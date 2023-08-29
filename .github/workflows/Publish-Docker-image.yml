@@ -38,11 +38,47 @@ jobs:
         with:
           images: ${{vars.DOCKER_HUB_REPO}}
       
+        
+      - name: Extract docker tags
+        id: docker-tag
+        run: |
+          DOCKER_REPO_NAME = "${{ vars.DOCKER_HUB_REPO }}"
+
+          auto_tags = """${{ steps.meta.outputs.tags }}"""
+          branch = "${{github.ref_name}}"
+          event_name = "${{github.event_name}}" #release
+
+          DOCKER_RELEASE_TAGS = f"""{DOCKER_REPO_NAME}:{branch}"""
+
+          if event_name == "release":
+              if "nightly" in branch or "alpha" in branch:
+                  DOCKER_RELEASE_TAGS = DOCKER_RELEASE_TAGS + f", {DOCKER_REPO_NAME}:nightly"
+              else:
+                  DOCKER_RELEASE_TAGS = DOCKER_RELEASE_TAGS + f", {DOCKER_REPO_NAME}:latest"
+
+
+          print("-"*20)
+          print(f"auto_tags '{auto_tags}'")
+          print("branch", branch)
+          print("event_name", event_name)
+          print()
+          print(f"DOCKER_RELEASE_TAGS '{DOCKER_RELEASE_TAGS}'")
+          print("-"*20)
+          
+          import os
+          name = 'DOCKER_RELEASE_TAGS'
+          value = DOCKER_RELEASE_TAGS
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+              print(f'{name}={value}', file=fh)
+
+        shell: python
+
       - name: Build and push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }} #, ${{vars.DOCKER_HUB_REPO}}:latest
+          tags: ${{ steps.docker-tag.outputs.DOCKER_RELEASE_TAGS }}
+          # tags: ${{ steps.meta.outputs.tags }} #, ${{vars.DOCKER_HUB_REPO}}:latest
           labels: ${{ steps.meta.outputs.labels }}
