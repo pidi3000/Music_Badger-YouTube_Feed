@@ -1,7 +1,11 @@
 import os
+from pathlib import Path
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-db_path = os.path.join(basedir, 'database.db')
+
+
+
+basedir = Path(__file__).parent.parent.parent.absolute()
+db_path = str(basedir.joinpath("data/database.db").absolute())
 
 
 class Config:

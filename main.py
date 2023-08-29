@@ -9,9 +9,13 @@ if __name__ == '__main__':
 
     print(app.url_map)
 
+    from music_feed._data.config import db_path
+
     print("-"*100)
     print(".\n"*2)
     print("Version: ", APP_VERSION)
+    print("")
+    print("DB_path: ", db_path)
     print(".\n"*2)
     print("-"*100)
 
