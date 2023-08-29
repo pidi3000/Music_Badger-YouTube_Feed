@@ -28,37 +28,31 @@ jobs:
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ vars.DOCKER_HUB_REPO }}
-        
-      - name: Set env BRANCH
-        run: echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
-        
-      - name: Set env TAG
-        id: docker-tag
-        run: |
-          echo "Set env tag"
-          echo "event name  $GITHUB_EVENT_NAME"
-          if [[ $BRANCH == 'main' && $GITHUB_EVENT_NAME == 'release' ]]; then
-              echo "tag latest"
-              echo "DOCKER_RELEASE_TAG=latest" >> "$GITHUB_ENV"
-              echo "DOCKER_RELEASE_TAG=latest" >> "$GITHUB_OUTPUT"
-              
-          elif [[ $BRANCH == 'main' && $GITHUB_EVENT_NAME == 'push' ]]; then
-              echo "tag nightly"
-              echo "DOCKER_RELEASE_TAG=nightly" >> "$GITHUB_ENV"
-              echo "DOCKER_RELEASE_TAG=nightly" >> "$GITHUB_OUTPUT"
-              
-          else
-              echo "Nothing to do"
-              echo "DOCKER_RELEASE_TAG=" >> "$GITHUB_ENV"
-              echo "DOCKER_RELEASE_TAG=" >> "$GITHUB_OUTPUT"
-          fi
 
-      - name: tag test 2
+      - name: Extract docker tags
+        id: docker-tag
         run: |
           auto_tags = """${{ steps.meta.outputs.tags }}"""
           branch = "${{github.ref_name}}"
           event = "${{github.event}}"
           event_name = "${{github.event_name}}" #release
+
+          DOCKER_RELEASE_TAGS = f"""{DOCKER_REPO_NAME}:{branch}"""
+
+          if event_name == "release":
+              if "nightly" in branch or "alpha" in branch:
+                  DOCKER_RELEASE_TAGS = DOCKER_RELEASE_TAGS + f", {DOCKER_REPO_NAME}:nightly"
+              else:
+                  DOCKER_RELEASE_TAGS = DOCKER_RELEASE_TAGS + f", {DOCKER_REPO_NAME}:latest"
+
+
+          print("-"*20)
+          print(f"auto_tags '{auto_tags}'")
+          print("branch", branch)
+          print("event_name", event_name)
+          print()
+          print(f"DOCKER_RELEASE_TAGS '{DOCKER_RELEASE_TAGS}'")
+          print("-"*20)
           
           print("-"*20)
           print("auto_tags", auto_tags)
@@ -70,7 +64,7 @@ jobs:
         shell: python
 
       - name: print env vars
-        run: echo "Branch Name $BRANCH , tag ${{ steps.docker-tag.outputs.DOCKER_RELEASE_TAG }}"
+        run: echo "Branch Name $BRANCH , tag ${{ steps.docker-tag.outputs.DOCKER_RELEASE_TAGS }}"
 
 
 
