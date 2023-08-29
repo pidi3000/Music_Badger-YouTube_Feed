@@ -2,8 +2,6 @@ import os
 from pathlib import Path
 
 
-
-
 basedir = Path(__file__).parent.parent.parent.absolute()
 db_path = str(basedir.joinpath("data/database.db").absolute())
 
