@@ -53,6 +53,12 @@ jobs:
               echo "DOCKER_RELEASE_TAG=" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: tag test 2
+        run: |
+          print("auto genereated tags", ${{ steps.meta.outputs.tags }})
+          print()
+        shell: python
+
 
       - name: print env vars
         run: echo "Branch Name $BRANCH , tag ${{ steps.docker-tag.outputs.DOCKER_RELEASE_TAG }}"
