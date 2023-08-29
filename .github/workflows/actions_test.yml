@@ -30,6 +30,7 @@ jobs:
           images: ${{ vars.DOCKER_HUB_REPO }}
         
       - name: Set env BRANCH
+        id: branch
         run: echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
         
       - name: Set env TAG
@@ -56,8 +57,17 @@ jobs:
       - name: tag test 2
         run: |
           auto_tags = "${{ steps.meta.outputs.tags }}"
-          print("auto genereated tags", auto_tags)
-          print()
+          branch = "${{github.ref_name}}"
+          event = "${{github.event}}"
+          event_name = "${{github.event_name}}"
+          
+          print("-"*20)
+          print("auto_tags", auto_tags)
+          print("branch", branch)
+          print("event", event)
+          print("event_name", event_name)
+          print("-"*20)
+
         shell: python
 
 
