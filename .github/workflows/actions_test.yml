@@ -16,9 +16,6 @@ on:
   push:
     branches:
       - 'main'
-
-env:
-  DOCKER_RELEASE_TAG: Monday
   
 jobs:
   Action_test:
