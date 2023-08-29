@@ -12,7 +12,7 @@ name: Github Action test
 on:
   release:
     types: [published]
-    
+
   push:
     branches:
       - 'nightly'
@@ -58,6 +58,12 @@ jobs:
           print()
           print(f"DOCKER_RELEASE_TAGS '{DOCKER_RELEASE_TAGS}'")
           print("-"*20)
+          
+          import os
+          name = 'DOCKER_RELEASE_TAGS'
+          value = DOCKER_RELEASE_TAGS
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+              print(f'{name}={value}', file=fh)
 
           import os
           name = 'DOCKER_RELEASE_TAGS'
