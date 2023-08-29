@@ -1,0 +1,63 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# GitHub recommends pinning actions to a commit SHA.
+# To get a newer version, you will need to update the SHA.
+# You can also reference a tag or branch, but the action may change without warning.
+
+name: Publish Docker image
+
+on:
+  release:
+    types: [published]
+    
+  push:
+    branches:
+      - 'main'
+
+env:
+  DOCKER_RELEASE_TAG: Monday
+  
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ vars.DOCKER_HUB_REPO }}
+        
+      - name: Set env BRANCH
+        run: echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
+        
+      - name: Set env TAG
+        run: |
+          if [[ $BRANCH == 'main' && $GITHUB_EVENT_NAME == 'release' ]]; then
+              echo "tag latest"
+              echo "DOCKER_RELEASE_TAG=latest" >> "$GITHUB_ENV"
+          elif [[ $BRANCH == 'main' && $GITHUB_EVENT_NAME == 'push' ]];
+              echo "tag nightly"
+              echo "DOCKER_RELEASE_TAG=nightly" >> "$GITHUB_ENV"
+          fi
+
+
+      - name: print env vars
+        run: echo "Branch Name $BRANCH , tag $DOCKER_RELEASE_TAG"
+
+
+
+
+
+
+
+
+
+
+          
