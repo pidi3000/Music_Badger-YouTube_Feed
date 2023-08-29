@@ -14,8 +14,6 @@ on:
     types: [published]
     
   push:
-    branches:
-      - 'main'
   
 jobs:
   Action_test:
