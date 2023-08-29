@@ -14,6 +14,9 @@ on:
     types: [published]
     
   push:
+    branches:
+      - 'nightly'
+      - 'alpha'
   
 jobs:
   Action_test:
@@ -32,9 +35,11 @@ jobs:
       - name: Extract docker tags
         id: docker-tag
         run: |
+
+          DOCKER_REPO_NAME = "${{ vars.DOCKER_HUB_REPO }}"
+
           auto_tags = """${{ steps.meta.outputs.tags }}"""
           branch = "${{github.ref_name}}"
-          event = "${{github.event}}"
           event_name = "${{github.event_name}}" #release
 
           DOCKER_RELEASE_TAGS = f"""{DOCKER_REPO_NAME}:{branch}"""
@@ -53,13 +58,12 @@ jobs:
           print()
           print(f"DOCKER_RELEASE_TAGS '{DOCKER_RELEASE_TAGS}'")
           print("-"*20)
-          
-          print("-"*20)
-          print("auto_tags", auto_tags)
-          print("branch", branch)
-          print("event", event) 
-          print("event_name", event_name)
-          print("-"*20)
+
+          import os
+          name = 'DOCKER_RELEASE_TAGS'
+          value = DOCKER_RELEASE_TAGS
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+              print(f'{name}={value}', file=fh)
 
         shell: python
 
