@@ -14,8 +14,6 @@ on:
     types: [published]
     
   push:
-    branches:
-      - 'main'
   
 jobs:
   Action_test:
@@ -35,24 +33,29 @@ jobs:
         run: echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
         
       - name: Set env TAG
+        id: docker-tag
         run: |
           echo "Set env tag"
           echo "event name  $GITHUB_EVENT_NAME"
           if [[ $BRANCH == 'main' && $GITHUB_EVENT_NAME == 'release' ]]; then
               echo "tag latest"
               echo "DOCKER_RELEASE_TAG=latest" >> "$GITHUB_ENV"
+              echo "DOCKER_RELEASE_TAG=latest" >> "$GITHUB_OUTPUT"
               
           elif [[ $BRANCH == 'main' && $GITHUB_EVENT_NAME == 'push' ]]; then
               echo "tag nightly"
               echo "DOCKER_RELEASE_TAG=nightly" >> "$GITHUB_ENV"
+              echo "DOCKER_RELEASE_TAG=nightly" >> "$GITHUB_OUTPUT"
               
           else
-            echo "Nothing to do"
+              echo "Nothing to do"
+              echo "DOCKER_RELEASE_TAG=" >> "$GITHUB_ENV"
+              echo "DOCKER_RELEASE_TAG=" >> "$GITHUB_OUTPUT"
           fi
 
 
       - name: print env vars
-        run: echo "Branch Name $BRANCH , tag $DOCKER_RELEASE_TAG"
+        run: echo "Branch Name $BRANCH , tag ${{ steps.docker-tag.outputs.DOCKER_RELEASE_TAG }}"
 
 
 
