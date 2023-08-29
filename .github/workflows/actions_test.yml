@@ -12,8 +12,11 @@ name: Github Action test
 on:
   release:
     types: [published]
-    
+
   push:
+    branches:
+      - 'nightly'
+      - 'alpha'
   
 jobs:
   Action_test:
@@ -30,6 +33,7 @@ jobs:
           images: ${{ vars.DOCKER_HUB_REPO }}
         
       - name: Set env BRANCH
+        id: branch
         run: echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
         
       - name: Set env TAG
@@ -54,23 +58,41 @@ jobs:
           fi
 
       - name: tag test 2
+        id: test2
         run: |
+          DOCKER_REPO_NAME = "${{ vars.DOCKER_HUB_REPO }}"
+
           auto_tags = """${{ steps.meta.outputs.tags }}"""
           branch = "${{github.ref_name}}"
-          event = "${{github.event}}"
           event_name = "${{github.event_name}}" #release
-          
+
+          DOCKER_RELEASE_TAGS = f"""{DOCKER_REPO_NAME}:{branch}"""
+
+          if event_name is "release":
+              if "nightly" in branch or "alpha" in branch:
+                  DOCKER_RELEASE_TAGS = DOCKER_RELEASE_TAGS + f", {DOCKER_REPO_NAME}:nightly"
+              else:
+                  DOCKER_RELEASE_TAGS = DOCKER_RELEASE_TAGS + f", {DOCKER_REPO_NAME}:latest"
+
+
           print("-"*20)
-          print("auto_tags", auto_tags)
+          print(f"auto_tags '{auto_tags}'")
           print("branch", branch)
-          print("event", event) 
           print("event_name", event_name)
+          print()
+          print(f"DOCKER_RELEASE_TAGS '{DOCKER_RELEASE_TAGS}'")
           print("-"*20)
+          
+          import os
+          name = 'DOCKER_RELEASE_TAGS'
+          value = DOCKER_RELEASE_TAGS
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+              print(f'{name}={value}', file=fh)
 
         shell: python
 
       - name: print env vars
-        run: echo "Branch Name $BRANCH , tag ${{ steps.docker-tag.outputs.DOCKER_RELEASE_TAG }}"
+        run: echo "Branch Name $BRANCH , tag ${{ steps.test2.outputs.DOCKER_RELEASE_TAGS }}"
 
 
 

@@ -44,5 +44,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}, ${{vars.DOCKER_HUB_REPO}}:latest
+          tags: ${{ steps.meta.outputs.tags }} #, ${{vars.DOCKER_HUB_REPO}}:latest
           labels: ${{ steps.meta.outputs.labels }}
