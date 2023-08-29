@@ -1,0 +1,96 @@
+{% extends 'channel_base.html' %}
+
+
+{% block content %}
+<link type="text/css" rel="stylesheet" href="/style/chanel_index_v2.css">
+<link type="text/css" rel="stylesheet" href="/style/dropdown_menu.css">
+
+<h1 class="title" data-autoset-text-color="true">{% block title %} Channels V3 {% endblock %}</h1>
+
+
+<div class="dropdown">
+    <button class="dropbtn">Filter</button>
+    <div class="dropdown-content">
+
+        <div data-autoset-text-color="true" onclick="set_tagID_filtered(-1)" style="background-color: #ffffff">All</div>
+        <div data-autoset-text-color="true" onclick="set_tagID_filtered(-2)" style="background-color: #353535">Untagged
+        </div>
+
+        {% for tag in tags %}
+
+        <div data-autoset-text-color="true" onclick="set_tagID_filtered({{ tag.id }})"
+            style="background-color:{{ tag.color }}">{{ tag.name }}</div>
+
+        {% endfor %}
+    </div>
+</div>
+
+<button onclick="send_all_tags_form()" style="cursor: pointer;">
+    Save All
+</button>
+
+<div class="channel-list-div">
+    <ul class="channel-list">
+
+        {% for channel in channels %}
+        <div id="channel_{{ channel.id }}" class="channel-list-entry" style="outline: 5px solid {{ channel.color }}; "
+            data-tagid="{% for tag in channel.tags %}{{tag.id}},{% endfor %}">
+
+            <p>
+                <b>#{{ channel.id }}</b>
+                <b class="name">
+                    <a href="{{ channel.yt_link }}" target="_blank" rel="noopener noreferrer">
+                        &ensp; {{ channel.name }}
+                    </a>
+                </b>
+
+
+                <a href="{{ url_for('.edit', channel_id=channel.id) }}">Edit</a>
+
+            </p>
+
+
+            <div class="profile-picture-box">
+                <img src="{{channel.profile_img_url}}" alt="profile img">
+            </div>
+
+
+            <form id="edit_form_{{ channel.id }}" class="tag-list" method="POST"
+                action="{{ url_for('.edit_tags', channel_id=channel.id) }}">
+                <!-- <form method="POST" action="http://localhost:5000/channels/3/editv2/"> -->
+
+                <label for="tags">Choose a Tags:</label>
+                <select class="tag-list" name="tags" id="tags" multiple onchange="register_tag_change('{{ channel.id }}')">
+                    {% for tag in tags %}
+
+                    <option data-autoset-text-color='true' style="background-color: {{ tag.color }};"
+                        value="{{ tag.name }}" {% if tag in channel.tags %} selected {% endif %}>{{ tag.name }}
+                    </option>
+
+                    {% endfor %}
+                </select>
+
+                <input value="Save" style="background-color: greenyellow; cursor: pointer;"
+                    onclick="send_tags_form('{{ channel.id }}')">
+                <!-- onclick="set_Filter_Parameter_on_form_action('edit_form_{{ channel.id }}')"> -->
+                <!-- onclick="return confirm('Are you sure you want to save this entry?')"> -->
+
+            </form>
+
+            <hr>
+            <form method="POST" action="{{ url_for('.delete', channel_id=channel.id) }}">
+                <input type="submit" value="Delete channel" style="width: fit-content; background-color: red;"
+                    onclick="return confirm('Are you sure you want to delete this entry?')">
+            </form>
+        </div>
+        {% endfor %}
+    </ul>
+
+</div>
+
+<script src="/scripts/filter_tag.js"></script>
+<script src="/scripts/client_side_data_filter.js"></script>
+
+<script src="/scripts/edit_tags.js"></script>
+
+{% endblock %}

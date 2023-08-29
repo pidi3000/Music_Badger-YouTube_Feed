@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %} {% endblock %} - FlaskApp</title>
+    <link type="text/css" rel="stylesheet" href="/style/base.css">
+</head>
+
+<body class="body-style" >
+    <nav>
+        <a href="{{ url_for('index') }}">FlaskApp</a>
+        <a href="{{ url_for('tag.index') }}">Tag</a>
+        <!-- <a href="{{ url_for('channel.index') }}">Channel</a> -->
+        <a href="{{ url_for('channel.index') }}">Channel</a>
+    </nav>
+    <hr>
+    {% block navbar %} {% endblock %}
+    <div class="content">
+        {% block content %} {% endblock %}
+    </div>
+</body>
+
+<script src="/scripts/autoset_text_color.js"></script>
+
+<script>
+    
+    // open url in new tab
+    function new_tab(url){
+        window.open(url, '_blank').focus();
+    }
+</script>
+
+</html>

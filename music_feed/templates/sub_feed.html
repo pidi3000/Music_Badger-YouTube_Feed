@@ -1,0 +1,74 @@
+{% extends 'base_app.html' %}
+
+<!-- Uploads are arranged using display flex  -->
+
+{% block content %}
+<link type="text/css" rel="stylesheet" href="/style/musicFeed_v2.css">
+<link type="text/css" rel="stylesheet" href="/style/dropdown_menu.css">
+
+<h1 class="title" data-autoset-text-color="true">{% block title %} Feed {% endblock %}</h1>
+
+
+<div class="dropdown">
+    <button class="dropbtn">Filter</button>
+    <div class="dropdown-content">
+
+        <div data-autoset-text-color="true" onclick="set_tagID_filtered(-1)" style="background-color: #ffffff">All</div>
+        <div data-autoset-text-color="true" onclick="set_tagID_filtered(-2)" style="background-color: #353535">Untagged
+        </div>
+
+        {% for tag in tags %}
+
+        <div data-autoset-text-color="true" onclick="set_tagID_filtered({{ tag.id }})"
+            style="background-color:{{ tag.color }}">{{ tag.name }}</div>
+
+        {% endfor %}
+    </div>
+</div>
+
+<button onclick="update_uploads()">
+    Update
+</button>
+
+<template id="upload_template">
+    <div id="upload-id" class="music-grid-item" data-tagid="TODO" style="outline: 5px solid #ffffff; ">
+
+        <img id="image" class="video-pic" src="TODO" alt="none">
+
+        <div id="title" class="video-title" title="TODO">TODO</div>
+        <!-- <div id="title" class="video-title" title="Neoni - Blurry (Lyrics)">"Neoni - Blurry (Lyrics)"</div> -->
+
+        <div id="channel_name" class="video-channel">
+            TODO
+        </div>
+
+        <div id="time" class="video-time" title="TODO">
+            TODO
+        </div>
+    </div>
+</template>
+<div id="upload_list" class="music-grid-container" onload="alert('test');">
+
+
+
+</div>
+
+<button style="width: 80%; height: 50px;" onclick="get_more_uploads()">
+    load more
+</button>
+
+<script src="scripts/scroll_end_event.js"></script>
+<script src="/scripts/filter_tag.js"></script>
+
+<script src="/scripts/load_uploads.js"></script>
+
+<script>
+
+    function open_video(url) {
+        console.log(url);
+
+        window.open(url, '_blank').focus();
+    }
+
+</script>
+{% endblock %}
