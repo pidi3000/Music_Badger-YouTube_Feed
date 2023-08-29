@@ -40,6 +40,7 @@ jobs:
       - name: Set env TAG
         run: |
           echo "Set env tag"
+          echo "event name  $GITHUB_EVENT_NAME"
           if [[ $BRANCH == 'main' && $GITHUB_EVENT_NAME == 'release' ]]; then
               echo "tag latest"
               echo "DOCKER_RELEASE_TAG=latest" >> "$GITHUB_ENV"
