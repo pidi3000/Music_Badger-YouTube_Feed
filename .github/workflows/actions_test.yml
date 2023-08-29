@@ -56,16 +56,17 @@ jobs:
 
       - name: tag test 2
         run: |
-          auto_tags = "${{ steps.meta.outputs.tags }}"
-          branch = "${{github.ref_name}}"
+          
           event = "${{github.event}}"
           event_name = "${{github.event_name}}"
+          print("event", event)
+          print("event_name", event_name)
+          auto_tags = "${{ steps.meta.outputs.tags }}"
+          branch = "${{github.ref_name}}"
           
           print("-"*20)
           print("auto_tags", auto_tags)
           print("branch", branch)
-          print("event", event)
-          print("event_name", event_name)
           print("-"*20)
 
         shell: python
