@@ -91,7 +91,6 @@ jobs:
 
         shell: python
 
-
       - name: print env vars
         run: echo "Branch Name $BRANCH , tag ${{ steps.test2.outputs.DOCKER_RELEASE_TAGS }}"
 
