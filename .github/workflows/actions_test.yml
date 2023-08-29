@@ -53,6 +53,25 @@ jobs:
               echo "DOCKER_RELEASE_TAG=" >> "$GITHUB_OUTPUT"
           fi
 
+<<<<<<< Updated upstream
+=======
+      - name: tag test 2
+        run: |
+          auto_tags = """${{ steps.meta.outputs.tags }}"""
+          branch = "${{github.ref_name}}"
+          event = "${{github.event}}"
+          event_name = "${{github.event_name}}" #release
+          
+          print("-"*20)
+          print("auto_tags", auto_tags)
+          print("branch", branch)
+          print("event", event) 
+          print("event_name", event_name)
+          print("-"*20)
+
+        shell: python
+
+>>>>>>> Stashed changes
 
       - name: print env vars
         run: echo "Branch Name $BRANCH , tag ${{ steps.docker-tag.outputs.DOCKER_RELEASE_TAG }}"
