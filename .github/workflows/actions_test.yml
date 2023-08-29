@@ -7,7 +7,7 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: Publish Docker image
+name: Github Action test
 
 on:
   release:
@@ -21,8 +21,8 @@ env:
   DOCKER_RELEASE_TAG: Monday
   
 jobs:
-  push_to_registry:
-    name: Push Docker image to Docker Hub
+  Action_test:
+    name: Action test set env vars
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -39,12 +39,17 @@ jobs:
         
       - name: Set env TAG
         run: |
+          echo "Set env tag"
           if [[ $BRANCH == 'main' && $GITHUB_EVENT_NAME == 'release' ]]; then
               echo "tag latest"
               echo "DOCKER_RELEASE_TAG=latest" >> "$GITHUB_ENV"
-          elif [[ $BRANCH == 'main' && $GITHUB_EVENT_NAME == 'push' ]];
+              
+          elif [[ $BRANCH == 'main' && $GITHUB_EVENT_NAME == 'push' ]]; then
               echo "tag nightly"
               echo "DOCKER_RELEASE_TAG=nightly" >> "$GITHUB_ENV"
+              
+          else
+            echo "Nothing to do"
           fi
 
 
