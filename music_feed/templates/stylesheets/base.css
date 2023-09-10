@@ -1,5 +1,4 @@
-
-.body-style{
+.body-style {
     background-color: rgb(70, 70, 70);
 }
 
@@ -69,4 +68,31 @@ nav a {
     font-size: 3em;
     margin-left: 50px;
     text-decoration: none;
+}
+
+/*  Loader     */
+
+#loading {
+    width: 30px;
+    height: 30px;
+    border: 5px solid #f3f3f3;
+    border-top: 6px solid #9c41f2;
+    border-radius: 100%;
+    margin: 5px;
+    visibility: hidden;
+    animation: spin 1s infinite linear;
+}
+
+#loading.display {
+    visibility: visible;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }

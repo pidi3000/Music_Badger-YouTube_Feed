@@ -34,8 +34,9 @@ function add_uploads(uploads_data) {
 
         /////////////////////////////////////////////////////////////////////////////
         var mainDIV = clone.getElementById("upload-id")
-        mainDIV.onclick = function () { open_video(upload["url"]); };
+        // mainDIV.onclick = function () { open_video(upload["url"]); };
         mainDIV.id = "upload_" + upload["id"];
+        mainDIV.href = upload["url"];
 
         tags = upload["tags"];
         var tag_string = "";
@@ -158,6 +159,8 @@ function reload_uploads() {
 }
 
 function update_uploads() {
+    displayLoading();
+
     console.log("Updating Uploads list...");
     console.log(upload_update_url);
 
@@ -174,8 +177,11 @@ function update_uploads() {
             console.log("Nothing New")
         }
 
+        hideLoading();
+
     }).catch(error => {
         console.error(error);
+        hideLoading();
     });
 
 }

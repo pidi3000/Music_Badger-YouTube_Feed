@@ -26,12 +26,15 @@
     </div>
 </div>
 
-<button onclick="update_uploads()">
+<button onclick="update_uploads()" style="width: 100px; height: 50px;">
     Update
 </button>
+<div id="loading"></div>
 
 <template id="upload_template">
-    <div id="upload-id" class="music-grid-item" data-tagid="TODO" style="outline: 5px solid #ffffff; ">
+    <a id="upload-id" class="music-grid-item" data-tagid="TODO" style="outline: 5px solid #ffffff;" target=”_blank”>
+        <!-- <div id="upload-id" class="music-grid-item" data-tagid="TODO" style="outline: 5px solid #ffffff;"> -->
+        <!-- <div id="upload-id" data-tagid="TODO" style="outline: 5px solid #ffffff;"> -->
 
         <img id="image" class="video-pic" src="TODO" alt="none">
 
@@ -45,12 +48,11 @@
         <div id="time" class="video-time" title="TODO">
             TODO
         </div>
-    </div>
+        <!-- </div> -->
+    </a>
 </template>
-<div id="upload_list" class="music-grid-container" onload="alert('test');">
 
-
-
+<div id="upload_list" class="music-grid-container">
 </div>
 
 <button style="width: 80%; height: 50px;" onclick="get_more_uploads()">
@@ -60,15 +62,7 @@
 <script src="scripts/scroll_end_event.js"></script>
 <script src="/scripts/filter_tag.js"></script>
 
+<script src="/scripts/loader.js"></script>
 <script src="/scripts/load_uploads.js"></script>
 
-<script>
-
-    function open_video(url) {
-        console.log(url);
-
-        window.open(url, '_blank').focus();
-    }
-
-</script>
 {% endblock %}
