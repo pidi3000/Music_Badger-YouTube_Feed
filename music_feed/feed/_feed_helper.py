@@ -1,7 +1,8 @@
 
 from ..extension import db
 from ..db_models import Tag, Channel, Upload
-from .._data.config import Config
+
+from flask import current_app
 
 
 from datetime import datetime
@@ -172,9 +173,9 @@ def _get_uploads_before(last_upload_idx: int | None = None) -> list[Upload]:
 
         if last_upload:
             return Upload.query.order_by(Upload.dateTime.desc()).filter(
-                Upload.dateTime < last_upload.dateTime).limit(Config.FEED_UPLOADS_PER_PAGE).all()
+                Upload.dateTime < last_upload.dateTime).limit(current_app.config["MUSIC_FEED"]["FEED_UPLOADS_PER_PAGE"]).all()
 
-    return Upload.query.order_by(Upload.dateTime.desc()).limit(Config.FEED_UPLOADS_PER_PAGE).all()
+    return Upload.query.order_by(Upload.dateTime.desc()).limit(current_app.config["MUSIC_FEED"]["FEED_UPLOADS_PER_PAGE"]).all()
 
 
 def _get_Tagged_Uploads_v1(last_upload_idx: int | None = None, filter_tag_id: int | None = None):
@@ -225,8 +226,8 @@ def _get_Tagged_Uploads_v1(last_upload_idx: int | None = None, filter_tag_id: in
                     tagged_uploads = tagged_uploads[cut_off_idx:]
                 # print("list length: ", len(tagged_uploads))
 
-        if len(tagged_uploads) > Config.FEED_UPLOADS_PER_PAGE:
-            tagged_uploads = tagged_uploads[:Config.FEED_UPLOADS_PER_PAGE]
+        if len(tagged_uploads) > current_app.config["MUSIC_FEED"]["FEED_UPLOADS_PER_PAGE"]:
+            tagged_uploads = tagged_uploads[:current_app.config["MUSIC_FEED"]["FEED_UPLOADS_PER_PAGE"]]
 
         # print("list length: ", len(tagged_uploads))
         # print()
@@ -260,7 +261,7 @@ def _get_Tagged_Uploads_v1(last_upload_idx: int | None = None, filter_tag_id: in
                 else:
                     untagged_uploads.append(upload)
 
-            if len(untagged_uploads) >= Config.FEED_UPLOADS_PER_PAGE:
+            if len(untagged_uploads) >= current_app.config["MUSIC_FEED"]["FEED_UPLOADS_PER_PAGE"]:
                 break
 
         return untagged_uploads

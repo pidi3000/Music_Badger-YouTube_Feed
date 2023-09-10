@@ -6,7 +6,6 @@ import os
 
 from flask import Flask, render_template, Response, url_for, redirect
 
-from ._data.config import Config
 from .extension import db
 
 
@@ -71,16 +70,30 @@ def _init_db(app: Flask):
         db.create_all()
 
 
-def init_with_app(app:Flask):
-    print(Config.SQLALCHEMY_DATABASE_URI)
+def init_with_app(app: Flask):
+    # print(app.config["SQLALCHEMY_DATABASE_URI"])
     _init_db(app)
     _register_all_blueprints(app)
     _register_base_routes(app)
 
 
-def create_app(config_class=Config):
+def create_app(config) -> Flask:
+    """
+    Create app using settings defined in instace
+
+    Parameters
+    ----------
+
+    config
+        instace with FLASK settings as variabels
+
+    Returns
+    -------
+    Flask
+        the flask APP instance
+    """
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    app.config.from_object(config)
 
     init_with_app(app)
 
