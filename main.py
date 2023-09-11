@@ -42,7 +42,7 @@ def main():
             print(
                 f"ERROR: SSL files not found. Key: {key_path.exists()}, Cert: {cert_path.exists()}")
             if app.config["MUSIC_FEED"]["SSL_ENFORCE"]:
-                return
+                raise FileNotFoundError(f"SSL files not found. Key: {key_path.exists()}, Cert: {cert_path.exists()}")
 
     print(context)
     if context is None:
