@@ -2,3 +2,5 @@
 __pycache__/
 
 client_secret_youtube.json
+cert.pem
+key.pem
