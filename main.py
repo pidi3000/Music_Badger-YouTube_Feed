@@ -11,6 +11,11 @@ def main():
 
     print(app.url_map)
 
+    from pathlib import Path
+
+    cert_path = Path(app.config["MUSIC_FEED"]["SSL_CERT_PATH"]).absolute()
+    key_path = Path(app.config["MUSIC_FEED"]["SSL_KEY_PATH"]).absolute()
+
     print("-"*100)
     print(".")
     print(".")
@@ -19,8 +24,9 @@ def main():
     print("DB_path: ", app.config["SQLALCHEMY_DATABASE_URI"])
     print("")
     print("SSL_ENABLE: ", app.config["MUSIC_FEED"]["SSL_ENABLE"])
-    print("SSL_CERT_PATH: ", app.config["MUSIC_FEED"]["SSL_CERT_PATH"])
-    print("SSL_KEY_PATH: ", app.config["MUSIC_FEED"]["SSL_KEY_PATH"])
+    print("SSL_ENFORCE: ", app.config["MUSIC_FEED"]["SSL_ENFORCE"])
+    print("SSL_CERT_PATH: ", app.config["MUSIC_FEED"]["SSL_CERT_PATH"], cert_path.exists())
+    print("SSL_KEY_PATH: ", app.config["MUSIC_FEED"]["SSL_KEY_PATH"], key_path.exists())
     print(".")
     print(".")
     print("-"*100)
@@ -28,10 +34,6 @@ def main():
     context = None
     if app.config["MUSIC_FEED"]["SSL_ENABLE"]:
         # check ssl key and cert file exist
-        from pathlib import Path
-
-        cert_path = Path(app.config["MUSIC_FEED"]["SSL_CERT_PATH"]).absolute()
-        key_path = Path(app.config["MUSIC_FEED"]["SSL_KEY_PATH"]).absolute()
 
         print(cert_path.exists())
         print(key_path.exists())
