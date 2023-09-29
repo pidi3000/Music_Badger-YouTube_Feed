@@ -5,6 +5,7 @@ App factory init
 import os
 
 from flask import Flask, render_template, Response, url_for, redirect
+from flask_session import Session
 
 from .extension import db
 
@@ -69,10 +70,19 @@ def _init_db(app: Flask):
     with app.app_context():
         db.create_all()
 
+def _init_config(app: Flask):
+    pass 
+    # from  config_handler import FLASK_CONFIG
+    # app.config.from_object(FLASK_CONFIG)
 
+def _init_session(app: Flask):
+    Session(app)
+    
 def init_with_app(app: Flask):
     # print(app.config["SQLALCHEMY_DATABASE_URI"])
+    _init_session(app)
     _init_db(app)
+    
     _register_all_blueprints(app)
     _register_base_routes(app)
 
@@ -93,6 +103,7 @@ def create_app(config) -> Flask:
         the flask APP instance
     """
     app = Flask(__name__)
+    # _init_config(app)
     app.config.from_object(config)
 
     init_with_app(app)

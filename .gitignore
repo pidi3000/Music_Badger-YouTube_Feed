@@ -2,6 +2,7 @@
 # Project exludes
 .vscode/
 *.db
+flask_session/
 # music_feed/_data/private/client_secret_youtube.json
 */_data/private/*
 client_secret_youtube.json
