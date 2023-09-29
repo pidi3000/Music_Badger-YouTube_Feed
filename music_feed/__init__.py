@@ -71,9 +71,16 @@ def _init_db(app: Flask):
         db.create_all()
 
 def _init_config(app: Flask):
-    pass 
-    # from  config_handler import FLASK_CONFIG
-    # app.config.from_object(FLASK_CONFIG)
+    # pass
+    from music_feed.config import app_config
+    app_config
+    # print(app_config)
+    # print(app_config.config_file_path)
+    # app_config.load()
+    app_config.sync() 
+    
+    app.config.from_object(app_config.flask)
+
 
 def _init_session(app: Flask):
     Session(app)
@@ -87,15 +94,8 @@ def init_with_app(app: Flask):
     _register_base_routes(app)
 
 
-def create_app(config) -> Flask:
+def create_app() -> Flask:
     """
-    Create app using settings defined in instace
-
-    Parameters
-    ----------
-
-    config
-        instace with FLASK settings as variabels
 
     Returns
     -------
@@ -103,8 +103,8 @@ def create_app(config) -> Flask:
         the flask APP instance
     """
     app = Flask(__name__)
-    # _init_config(app)
-    app.config.from_object(config)
+    _init_config(app)
+    # app.config.from_object(config)
 
     init_with_app(app)
 
