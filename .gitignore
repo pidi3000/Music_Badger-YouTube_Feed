@@ -5,6 +5,7 @@
 flask_session/
 # music_feed/_data/private/client_secret_youtube.json
 */_data/private/*
+data/config.json
 client_secret_youtube.json
 
 
