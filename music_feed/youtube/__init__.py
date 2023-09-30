@@ -12,6 +12,7 @@ blueprint = Blueprint(
 # ACTION ITEM for developers:
 #     When running in production *do not* leave this option enabled.
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 
 # from . import routes
 
