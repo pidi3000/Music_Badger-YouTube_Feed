@@ -38,8 +38,8 @@ class Flask_Config(Badger_Config_Section):
 
         self.SESSION_TYPE = 'filesystem'
 
-        self.SSL_ENABLE = False
-        self.SSL_ENFORCE: bool = True
+        self.SSL_ENABLE = True
+        self.SSL_ENFORCE: bool = False
         self.SSL_CERT_PATH: Path = Path("ssl/cert.pem")  # relative to data dir
         self.SSL_KEY_PATH: Path = Path("ssl/key.pem")  # relative to data dir
 
