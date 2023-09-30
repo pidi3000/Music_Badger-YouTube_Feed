@@ -6,4 +6,4 @@ better docs soon
 
 # Installation
 
-Install from [Docker Hub](https://hub.docker.com/repository/docker/pidi3000/music_badger-youtube_feed/general)
+Install from [Docker Hub](https://hub.docker.com/r/pidi3000/music_badger-youtube_feed)
