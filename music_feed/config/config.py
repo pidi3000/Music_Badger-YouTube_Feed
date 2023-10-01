@@ -32,8 +32,7 @@ class Flask_Config(Badger_Config_Section):
 
         self.sqlite_db_path = Path("database.db")
         self.db_schema = 'sqlite:///'
-        self.SQLALCHEMY_DATABASE_URI = self.db_schema + \
-            str(self.sqlite_db_path)
+        self.SQLALCHEMY_DATABASE_URI = self.db_schema + str(self.sqlite_db_path)
         self.SQLALCHEMY_TRACK_MODIFICATIONS = False
 
         self.SESSION_TYPE = 'filesystem'
