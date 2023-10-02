@@ -6,6 +6,8 @@ from ._feed_helper import get_Uploads_dict, update_Uploads, get_Channels_Tagged_
 from ..db_models import Tag
 from ..help_functions import get_int_or_none
 
+from ..youtube_data import update_all_channels
+
 
 def _get_url_filter_parameters(request) -> tuple[int | None, int | None]:
     last_upload_idx = get_int_or_none(request.args.get("last_upload_idx"))
@@ -47,7 +49,8 @@ def uploads():
 
 @sub_feed_pages.route('/update', methods=('GET', ))
 def update():
-    num_uploads = update_Uploads()
+    # num_uploads = update_Uploads()
+    num_uploads = update_all_channels()
 
     response = {
         "response": "True" if num_uploads > 0 else "False"

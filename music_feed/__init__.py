@@ -70,26 +70,34 @@ def _init_db(app: Flask):
     with app.app_context():
         db.create_all()
 
+
 def _init_config(app: Flask):
     # pass
-    from music_feed.config import app_config
+    from .config import app_config
     app_config
     # print(app_config)
     # print(app_config.config_file_path)
     # app_config.load()
-    app_config.sync() 
-    
+    app_config.sync()
+
     app.config.from_object(app_config.flask)
 
 
 def _init_session(app: Flask):
     Session(app)
-    
+
+
+def _init_celery(app: Flask):
+    from .celery import celery_init_app
+    celery_init_app(app)
+
+
 def init_with_app(app: Flask):
     # print(app.config["SQLALCHEMY_DATABASE_URI"])
     _init_session(app)
     _init_db(app)
-    
+    _init_celery(app)
+
     _register_all_blueprints(app)
     _register_base_routes(app)
 
