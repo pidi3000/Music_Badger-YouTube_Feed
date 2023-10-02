@@ -15,32 +15,23 @@ YT_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
 
 def update_all_channels():
+    print("DEBUG START")
     channels: list[Channel] = Channel.query.order_by(Channel.id.asc()).all()
     # channels = Channel.get_all()
+    # channels = channels[:100]
 
-    channel_ids = []
-    for channel in channels:
-        channel_ids.append(channel.id)
-
-    NUM_WORKERS = 4
     result_ids = []
 
     num_new_uploads = 0
     start = time.time()
 
-    channel_groups = [channel_ids[i::NUM_WORKERS] for i in range(NUM_WORKERS)]
-
     # start task
-    for group in channel_groups:
-        print("DEBUG")
-        result_id = update_channel_group.delay(channel_ids=group)
-        result_ids.append(result_id)
-        print(f"DEBUG Result id: {result_id}")
+    for channel in channels:
+        res = update_channel_singel.delay(channel_id=channel.id)
+        result_ids.append(res.id)
 
-        # num_uploads = update_channel_group(channel_ids=group)
-        # num_new_uploads += num_uploads
-
-    # wait for task to finish
+    print("DEBUG LOOP")
+    # wait for all task to finish
     while True:
         all_done = True
         for result_id in result_ids:
@@ -50,24 +41,38 @@ def update_all_channels():
             if not ready:
                 all_done = False
 
-            print(f"{result_id}: ready: {ready}"
-                  f"\tsuccessful: {result.successful() if ready else None}"
-                  f"\tvalue: {result.get() if ready else result.result}"
-                  )
+            # print(
+            #     # f"{result_id} -->"
+            #     f"{result_ids.index(result_id)+1} -->"
+            #     f"\tready: {ready}"
+            #     f"\tsuccessful: {result.successful() if ready else None}"
+            #     f"\tvalue: {result.result}"
+            #     # f"\tvalue: {result.get() if ready else result.result}"
+            #     f"\tstate: {result.state}"
+            # )
 
         if all_done:
             break
 
-        time.sleep(1)
+        # print()
+        time.sleep(0.2)
 
     for result_id in result_ids:
         result = AsyncResult(result_id)
         result_value = result.get()
+        ready = result.ready()
 
-        print(
-            f"DEBUG task done, id: {result_id}\tsuccess: {result.successful()}")
+        # print(
+        #     f"DEBUG task done, id: {result_id}\tsuccess: {result.successful()}")
         if result.successful():
             num_new_uploads += result_value
+        else:
+            print(
+                f"{result_id}: ready: {ready}"
+                f"\tsuccessful: {result.successful() if ready else None}"
+                f"\tvalue: {result.get() if ready else result.result}"
+                f"\state: {result.state}"
+            )
 
     end = time.time()
 
@@ -91,6 +96,15 @@ def update_channel_group(channel_ids: list[int]):
     return num_new_uploads
 
 
+@shared_task(ignore_result=False)
+def update_channel_singel(channel_id: int):
+    # return update_channel_uploads(channel_id=channel_id)
+    num_uploads = update_channel_uploads(channel_id=channel_id)
+    # num_uploads += 2
+    # print(f"channel: {channel_id}, num: {num_uploads}")
+    return num_uploads
+
+
 def update_channel_uploads(channel_id: int):
     channel = Channel.query.filter_by(id=channel_id).first()
 
@@ -105,6 +119,7 @@ def update_channel_uploads(channel_id: int):
     new_uploads = handle_raw_upload(resp.text, channel_id=channel.id)
 
     db.session.commit()
+    # print(f"channel: {channel_id}, num: {len(new_uploads)}")
 
     return len(new_uploads)
 

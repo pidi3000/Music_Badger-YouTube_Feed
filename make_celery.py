@@ -5,3 +5,4 @@ celery_app = flask_app.extensions["celery"]
 
 # start celery worker cmd
 # celery -A make_celery worker --loglevel INFO
+# celery -A make_celery worker --loglevel INFO --concurrency 8
