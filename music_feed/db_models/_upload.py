@@ -28,13 +28,15 @@ class Upload(db.Model, _Base_Mixin):
     # https://stackoverflow.com/questions/35814211/how-to-add-a-custom-function-method-in-sqlalchemy-model-to-do-crud-operations
 
     @classmethod
-    def create(cls, yt_id, channel_id, title, thumbnail_url, dateTime):
+    def create(cls, yt_id, channel_id, title, thumbnail_url, dateTime, add_to_session:bool = True):
         if Upload.query.filter_by(yt_id=yt_id).first():
             return "Warning: Upload already in DB: {}".format(title)
 
         new_upload = Upload(yt_id=yt_id, channel_id=channel_id, title=title,
                             thumbnail_url=thumbnail_url, dateTime=dateTime)
-        db.session.add(new_upload)
+        
+        if add_to_session:
+            db.session.add(new_upload)
 
         return new_upload
 

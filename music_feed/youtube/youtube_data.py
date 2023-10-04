@@ -1,9 +1,13 @@
 
 from .YouTube_auth import get_authorized_yt_obj
+from ._uploads import update_all_async
 
 # TODO rework youtube stuff
 
 
+##################################################
+# Channels
+##################################################
 def get_channel_data(channel_id):
     channel_data = {
         "id": "00000",
@@ -88,3 +92,11 @@ def get_all_subscriptions():
         all_subscriptions.extend(_get_formated_subscriptions(response))
 
     return all_subscriptions
+
+
+##################################################
+# Uploads
+##################################################
+
+def update_Uploads():
+    return update_all_async()
