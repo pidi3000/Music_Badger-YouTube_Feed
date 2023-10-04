@@ -55,7 +55,7 @@ async def _update_channel_api_old(session, channel: Channel, youtube):
     return {"num_uploads": num_uploads, "errors": erros}
 
 
-async def _update_channel_api(session, channel: Channel, youtube):
+async def _update_channel_api(session, channel: Channel):
     YT_API_KEY = app_config.yt_feed.YT_API_KEY
     if YT_API_KEY is None or len(YT_API_KEY.strip()) < 10:
         raise KeyError(f"YT_API_KEY mus be set to use API")
@@ -218,23 +218,23 @@ def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int):
 ##################################################
 # Async stuff
 ##################################################
-async def _update_channel(session, channel: Channel, youtube):
+async def _update_channel(session, channel: Channel):
     data = {}
     api_errors = None
 
     if app_config.yt_feed.use_api:
 
-        if isinstance(youtube, flask.Response):
-            raise TypeError("YT not authorized")
+        try:
+            pass
+            data = await _update_channel_api(session, channel)
 
-        # needs test to see if solution 1 works better
-        data = await _update_channel_api(session, channel, youtube)
+            # no errors
+            if not (data["api_errors"] is not None and len(data["api_errors"]) > 0):
+                return data
 
-        # no errors
-        if not (data["api_errors"] is not None and len(data["api_errors"]) > 0):
-            return data
-
-        api_errors = data["api_errors"]
+            api_errors = data["api_errors"]
+        except Exception as e:
+            api_errors = str(e)
         # print("DEBUG API had error, using RSS")
 
     # config use_api is false or api had error
@@ -245,17 +245,11 @@ async def _update_channel(session, channel: Channel, youtube):
 
 
 async def _main(channels):
-    youtube = YouTube_auth.get_authorized_yt_obj()
-
     async with aiohttp.ClientSession() as session:
-        tasks = [_update_channel(session, channel, youtube)
+        tasks = [_update_channel(session, channel)
                  for channel in channels]
         responses = await asyncio.gather(*tasks)
 
-        # db.session.rollback()
-        # db.session.commit()
-
-        # Process responses here
         return responses
 
 
