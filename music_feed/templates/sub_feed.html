@@ -27,7 +27,11 @@
 </div>
 
 <button onclick="update_uploads()" style="width: 100px; height: 50px;">
-    Update
+    Update {% if yt_autherized %}
+    <div style="color: green;">O</div>
+    {% else %}
+    <div style="color: red;">X</div>
+    {% endif %}
 </button>
 <div id="loading"></div>
 
