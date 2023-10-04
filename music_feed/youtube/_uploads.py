@@ -56,7 +56,8 @@ async def _update_channel_api_old(session, channel: Channel, youtube):
 
 
 async def _update_channel_api(session, channel: Channel, youtube):
-    if app_config.yt_feed.YT_API_KEY is None:
+    YT_API_KEY = app_config.yt_feed.YT_API_KEY
+    if YT_API_KEY is None or len(YT_API_KEY.strip()) < 10:
         raise KeyError(f"YT_API_KEY mus be set to use API")
 
     playlist_id = ("UU" + channel.yt_id.removeprefix("UC"))
@@ -70,7 +71,7 @@ async def _update_channel_api(session, channel: Channel, youtube):
             "part": "snippet,contentDetails",
             "maxResults": 50,
             "playlistId": playlist_id,
-            "key": app_config.yt_feed.YT_API_KEY  # Replace with your API key app_config
+            "key": YT_API_KEY  # Replace with your API key app_config
         },
     ) as response:
         if response.status == 200:
