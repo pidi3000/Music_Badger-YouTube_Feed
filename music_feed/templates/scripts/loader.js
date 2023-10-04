@@ -8,7 +8,7 @@ function displayLoading() {
     // to stop loading after some time
     setTimeout(() => {
         loader.classList.remove("display");
-    }, 20000);
+    }, 120*1000);
 }
 
 // hiding loading 

@@ -2,9 +2,12 @@ import flask
 from flask import jsonify, render_template, request, redirect, url_for
 
 from . import blueprint as sub_feed_pages
-from ._feed_helper import get_Uploads_dict, update_Uploads, get_Channels_Tagged_dict
+from ._feed_helper import get_Uploads_dict, get_Channels_Tagged_dict
 from ..db_models import Tag
 from ..help_functions import get_int_or_none
+
+from music_feed.youtube import YouTube_auth
+from music_feed.youtube import youtube_data
 
 
 def _get_url_filter_parameters(request) -> tuple[int | None, int | None]:
@@ -24,18 +27,7 @@ def index():
     uploads = (get_Uploads_dict(filter_tag_id=filter_tag_id))
     tags = Tag.query.all()
 
-    # if 'my_color' not in flask.session:
-    #     flask.session['my_color'] = 0
-
-    # print()
-    # print()
-    # print(flask.session['my_color'])
-    # print(flask.session['credentials_MAIN'] if 'credentials_MAIN' in flask.session else "No credentials")
-    # flask.session['my_color'] += 1
-    # print(flask.session['my_color'])
-    # print()
-    # print()
-    return render_template('sub_feed.html', tags=tags, uploads=uploads)
+    return render_template('sub_feed.html', tags=tags, uploads=uploads, yt_autherized=YouTube_auth.check_user_yt_autherized())
 
 
 @sub_feed_pages.route('/uploads', methods=('GET', ))
@@ -47,7 +39,7 @@ def uploads():
 
 @sub_feed_pages.route('/update', methods=('GET', ))
 def update():
-    num_uploads = update_Uploads()
+    num_uploads = youtube_data.update_Uploads()
 
     response = {
         "response": "True" if num_uploads > 0 else "False"

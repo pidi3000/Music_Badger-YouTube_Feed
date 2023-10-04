@@ -30,6 +30,10 @@ API_SERVICE_NAME = 'youtube'
 API_VERSION = 'v3'
 
 
+def check_user_yt_autherized():
+    return 'credentials_MAIN' in flask.session
+
+
 def check_yt_credentials():
     if 'credentials_MAIN' not in flask.session:
         return flask.redirect(flask.url_for('authorize'))
@@ -146,7 +150,7 @@ def clear_credentials():
 @youtube_auth_pages.route('/client_secret', methods=['GET', 'POST'])
 def set_client_secret():
     # https://flask.palletsprojects.com/en/2.3.x/patterns/fileuploads/
-    
+
     UPLOAD_FOLDER = os.path.dirname(__file__)
     ALLOWED_EXTENSIONS = {'txt', 'json'}
 

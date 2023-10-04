@@ -7,9 +7,11 @@ from badger_config_handler import Badger_Config_Base, Badger_Config_Section
 class Flask_Config(Badger_Config_Section):
     _exclude_vars_ = ["db_schema", "SQLALCHEMY_DATABASE_URI"]
 
+    CELERY: dict
+
     PORT: int
     DEBUG: bool
-    
+
     SECRET_KEY: str
 
     sqlite_db_path: Path
@@ -26,13 +28,20 @@ class Flask_Config(Badger_Config_Section):
     SSL_KEY_PATH: Path
 
     def setup(self):
+        self.CELERY = dict(
+            broker_url="redis://localhost",
+            result_backend="redis://localhost",
+            task_ignore_result=True,
+        )
+
         # self.PORT = 5000
         self.DEBUG = True
         self.SECRET_KEY = 'REPLACE ME - this value is here as a placeholder.'
 
         self.sqlite_db_path = Path("database.db")
         self.db_schema = 'sqlite:///'
-        self.SQLALCHEMY_DATABASE_URI = self.db_schema + str(self.sqlite_db_path)
+        self.SQLALCHEMY_DATABASE_URI = self.db_schema + \
+            str(self.sqlite_db_path)
         self.SQLALCHEMY_TRACK_MODIFICATIONS = False
 
         self.SESSION_TYPE = 'filesystem'
@@ -74,8 +83,25 @@ class Flask_Config(Badger_Config_Section):
 class Feed_Config(Badger_Config_Section):
     uploads_per_page: int
 
+    use_api: bool
+    YT_API_KEY: str
+
     def setup(self):
         self.uploads_per_page = 4*20
+        
+        self.use_api = True
+        self.YT_API_KEY = ""
+
+
+class Celery_Config(Badger_Config_Section):
+    broker_url: str
+    result_backend: str
+    task_ignore_result: bool
+
+    def setup(self):
+        self.broker_url = "redis://localhost"
+        self.result_backend = "redis://localhost"
+        self.task_ignore_result = True
 
 
 class Config(Badger_Config_Base):
@@ -85,10 +111,12 @@ class Config(Badger_Config_Base):
     config_file_path = data_dir.joinpath("config.json")
 
     flask: Flask_Config
+    # celery: Celery_Config
     yt_feed: Feed_Config
 
     def __init__(self) -> None:
         self.flask = Flask_Config(section_name="flask")
+        # self.celery = Celery_Config(section_name="celery")
         self.yt_feed = Feed_Config(section_name="yt_feed")
 
         super().__init__(
