@@ -127,8 +127,6 @@ def _handle_upload_raw_api(channel_Data_Raw, channel_id: int, channel_name: str)
         if isinstance(upload, Upload):
             channel_Uploads.append(upload)
 
-        channel_Uploads.append("")
-
     return len(channel_Uploads), channel_Uploads
 
 
@@ -275,7 +273,7 @@ def update_all_async():
     end_all = time.time()
 
     time_taken = end_all - start_all
-    errors = {}
+    errors = {"count": 0}
     num_uploads = 0
 
     def handle_error(channel, list_name):
@@ -283,6 +281,7 @@ def update_all_async():
             if list_name not in errors:
                 errors[list_name] = []
             errors[list_name].append(channel[list_name])
+            errors["count"] = errors["count"] + 1
 
     for channel in all_channel_updates:
         num_uploads += channel["num_uploads"]
@@ -290,8 +289,8 @@ def update_all_async():
         handle_error(channel, "rss_errors")
         handle_error(channel, "api_errors")
 
-    if len(errors) > 0:
-        print("ERROR: check error logs")
+    if len(errors) > 1:
+        print(f"ERROR: {errors['count']}, check error logs")
 
     print(
         "Took {} seconds to Handle {} channels. Average per channel: {}".format(
