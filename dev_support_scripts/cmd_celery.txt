@@ -1,0 +1,10 @@
+cmd_celery.txt
+
+# stop all workers
+celery -A make_celery control shutdown
+
+# start worker
+celery -A make_celery worker --loglevel INFO --concurrency 4
+
+# start background worker
+celery -A make_celery worker --loglevel INFO --detach --concurrency 4
