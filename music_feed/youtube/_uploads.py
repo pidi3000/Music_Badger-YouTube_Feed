@@ -96,8 +96,8 @@ async def _update_channel_api(session, channel: Channel):
 
 
 def _handle_upload_raw_api(channel_Data_Raw, channel_id: int, channel_name: str):
-    # with open(f"uploads/{channel_name}.json", "w") as f:
-    #     json.dump(channel_Data_Raw, f, indent=4, ensure_ascii=False)
+    with open(f"data_dev/uploads/{channel_name}.json", "w") as f:
+        json.dump(channel_Data_Raw, f, indent=4, ensure_ascii=False)
 
     channel_Uploads = []
 
@@ -247,7 +247,6 @@ async def _main(channels):
         tasks = [_update_channel(session, channel)
                  for channel in channels]
         responses = await asyncio.gather(*tasks)
-
         return responses
 
 
@@ -304,7 +303,7 @@ def update_all_async():
     print()
     print()
 
-    # with open("errors.json", "w") as f:
-    #     json.dump(errors, f, indent=4)
+    with open("data_dev/errors.json", "w") as f:
+        json.dump(errors, f, indent=4)
 
     return num_uploads
