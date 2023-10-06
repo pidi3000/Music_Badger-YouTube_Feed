@@ -1,8 +1,10 @@
 
-from .YouTube_auth import get_authorized_yt_obj
+from .YouTube_auth import get_authorized_yt_obj, del_yt_credentials
 from ._uploads import update_all_async
 
 # TODO rework youtube stuff
+
+from google.auth.exceptions import RefreshError
 
 
 ##################################################
@@ -37,7 +39,7 @@ def get_channel_data(channel_id):
         channel_data["error"] = error_msg
 
     # print(response["items"][0])
-    print(channel_data)
+    # print(channel_data)
 
     return channel_data
 
@@ -71,27 +73,33 @@ def _get_formated_subscriptions(raw_data):
         subscriptions.append(channel_data)
 
         if count < 1:
-            print()
-            print(channel_data)
+            # print()
+            # print(channel_data)
             count += 1
 
     return subscriptions
 
 
 def get_all_subscriptions():
-    youtube = get_authorized_yt_obj()
+    try:
+        youtube = get_authorized_yt_obj()
 
-    all_subscriptions = []
+        all_subscriptions = []
 
-    # print(response["nextPageToken"])
-    response = _get_page_subscriptions(youtube)
-    all_subscriptions.extend(_get_formated_subscriptions(response))
-
-    while "nextPageToken" in response:
-        response = _get_page_subscriptions(youtube, response["nextPageToken"])
+        # print(response["nextPageToken"])
+        response = _get_page_subscriptions(youtube)
         all_subscriptions.extend(_get_formated_subscriptions(response))
 
-    return all_subscriptions
+        while "nextPageToken" in response:
+            response = _get_page_subscriptions(youtube, response["nextPageToken"])
+            all_subscriptions.extend(_get_formated_subscriptions(response))
+
+        return all_subscriptions
+    
+    except RefreshError as e:
+        print("ERROR: Credentials need to be Refreshed")
+        del_yt_credentials() 
+        return []
 
 
 ##################################################

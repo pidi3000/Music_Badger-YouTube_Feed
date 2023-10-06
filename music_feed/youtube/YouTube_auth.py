@@ -29,6 +29,10 @@ SCOPES = ['https://www.googleapis.com/auth/youtube.readonly']
 API_SERVICE_NAME = 'youtube'
 API_VERSION = 'v3'
 
+##################################################
+# Credential sutff
+##################################################
+
 
 def check_user_yt_autherized():
     return 'credentials_MAIN' in flask.session
@@ -37,6 +41,18 @@ def check_user_yt_autherized():
 def check_yt_credentials():
     if 'credentials_MAIN' not in flask.session:
         return flask.redirect(flask.url_for('authorize'))
+
+
+def get_yt_credentials():
+    return flask.session.get('credentials_MAIN', None)
+
+
+def del_yt_credentials():
+    del flask.session['credentials_MAIN']
+
+##################################################
+# other sutff
+##################################################
 
 
 def get_authorized_yt_obj():
