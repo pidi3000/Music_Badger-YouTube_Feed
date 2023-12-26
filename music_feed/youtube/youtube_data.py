@@ -10,6 +10,44 @@ from google.auth.exceptions import RefreshError
 ##################################################
 # Channels
 ##################################################
+
+def get_channel_ID_from_video(video_id):
+    # Create a YouTube Data API service
+    youtube = get_authorized_yt_obj()
+
+    # Retrieve video details using videos().list() method
+    video_response = youtube.videos().list(
+        part='snippet',
+        id=video_id
+    ).execute()
+
+    # Extract channel ID from video details
+    if 'items' not in video_response or len(video_response['items']) < 1:
+        raise LookupError(f"no youtube video found with {video_id=}")
+    
+    channel_id = video_response['items'][0]['snippet']['channelId']
+    return channel_id
+
+def get_channel_id_from_username(username:str):
+    
+    username = username.removeprefix("@").strip()
+    
+    youtube = get_authorized_yt_obj()
+
+    request = youtube.channels().list(
+        part='id',
+        forUsername=username
+    )
+
+    response = request.execute()
+
+    if 'items' not in response or len(response['items']) < 0:
+        raise LookupError(f"no youtube channel found with {username=}")
+    return response['items'][0]['id']
+    # else:
+    #     return None
+
+
 def get_channel_data(channel_id):
     channel_data = {
         "id": "00000",
@@ -91,14 +129,15 @@ def get_all_subscriptions():
         all_subscriptions.extend(_get_formated_subscriptions(response))
 
         while "nextPageToken" in response:
-            response = _get_page_subscriptions(youtube, response["nextPageToken"])
+            response = _get_page_subscriptions(
+                youtube, response["nextPageToken"])
             all_subscriptions.extend(_get_formated_subscriptions(response))
 
         return all_subscriptions
-    
+
     except RefreshError as e:
         print("ERROR: Credentials need to be Refreshed")
-        del_yt_credentials() 
+        del_yt_credentials()
         return []
 
 
