@@ -1,4 +1,6 @@
 
+import re
+
 from ..extension import db
 from ..db_models import Tag, Channel
 
@@ -13,7 +15,7 @@ from ..youtube import youtube_data as yt_data
 # TODO remove tags_old use channel.tags instead
 def handle_form(channel, form, tags_old):
     name = form['name']
-    yt_id = form["yt_id"]
+    yt_id = extract_channel_id(form["yt_id"])
 
     if len(yt_id) < 1:
         error_msg = "ERROR: no youtube channel ID"
@@ -136,6 +138,42 @@ def handle_form_tags(channel, tags_name: list[str]):
 ###########################################################################################
 # Helper Functions
 ###########################################################################################
+
+def extract_channel_id(channel_string):
+    yt_id = None
+    
+    # Can be:
+    # - just the channel ID
+    # - video URL from channel
+    # - channel URL ONLY if the ID is contained (NOT a custom URL like @mychannelname)
+
+    # Regular expressions to match different YouTube channel URL formats
+    patterns = [
+        r'(?:https?://)?(?:www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+)',
+        r'(?:https?://)?(?:www\.)?youtube\.com/channel/([a-zA-Z0-9_-]+)',
+        r'([a-zA-Z0-9_-]+)',
+    ]
+
+    # Loop through patterns to find a match
+    for pattern in patterns:
+        match = re.search(pattern, channel_string)
+        if match:
+            yt_id = match.group(1)
+
+            if pattern == patterns[0]:  # matched the video URL pattern
+                yt_id = yt_data.get_channel_ID_from_video(video_id=yt_id)
+
+            break
+
+    if yt_id is None:
+        raise LookupError("No channel or video ID pattern matched")
+
+    return yt_id
+
+###########################################################################################
+# Helper Functions
+###########################################################################################
+
 
 def handle_import_channel(request):  # TODO add error handling
 

@@ -56,6 +56,10 @@ class Channel(db.Model):
     def get_all(cls):
         return Channel.query.all()
 
+    @classmethod
+    def get_all_latest(cls):
+        return Channel.query.order_by(Channel.id.desc()).all()
+
     # https://stackoverflow.com/questions/35814211/how-to-add-a-custom-function-method-in-sqlalchemy-model-to-do-crud-operations
 
     @classmethod
