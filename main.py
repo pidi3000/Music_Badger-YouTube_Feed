@@ -1,4 +1,4 @@
-APP_VERSION = "1.4.0-alpha"
+APP_VERSION = "1.4.0"
 
 
 def main():
