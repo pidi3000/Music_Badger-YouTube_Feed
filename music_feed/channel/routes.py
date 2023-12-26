@@ -13,7 +13,10 @@ from . import blueprint as channel_pages
 
 @channel_pages.route('/')
 def index():
-    return render_template('channel_index.html', channels=Channel.get_all(), tags=Tag.get_all())
+    # channels = Channel.get_all()
+    channels = Channel.get_all_latest()
+
+    return render_template('channel_index.html', channels=channels, tags=Tag.get_all())
 
 
 # @channel_pages.route('/v2')
