@@ -64,6 +64,11 @@ function add_channels(data) {
         /////////////////////////////////////////////////////////////////////////////
         var image = clone.getElementById("channel_image_link")
         image.src = channel["profile_img_url"]
+        
+        var refresh_pfp_btn = clone.getElementById("refresh_pfp")
+        refresh_pfp_btn.onclick = function() {
+            window.location.href = "/channels/" + channel["id"] + "/refresh_pfp/";
+        };
 
 
         /////////////////////////////////////////////////////////////////////////////
