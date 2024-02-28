@@ -106,3 +106,29 @@ def delete(channel_id):
     db.session.commit()
 
     return redirect(url_for('.index'))
+
+######################################################################################################
+
+
+@channel_pages.route('/page', methods=('GET', ))
+def get_page():
+    last_channel_id = request.args.get("last_channel_id", None, int)
+    filter_tag_id = request.args.get("filter_tag", None, int)
+
+    print("last_channel_id: ", last_channel_id)
+    print("filter_tag_id: ", filter_tag_id)
+
+    channels = _channel_helper.get_Channels_Tagged_dict(
+        last_channel_id, filter_tag_id)
+
+    tags = []
+
+    for tag in Tag.get_all():
+        tags.append(tag.toDict())
+
+    return jsonify(
+        {
+            "channels": channels,
+            "tags": tags
+        }
+    )

@@ -1,3 +1,4 @@
+// ! Trigger 'page-end' event, sub-scripts then load more data
 // https://stackoverflow.com/questions/10059888/detect-when-scroll-reaches-the-bottom-of-the-page-without-jquery
 // https://jsfiddle.net/W75mP/
 
