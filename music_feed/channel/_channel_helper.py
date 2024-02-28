@@ -5,6 +5,7 @@ from ..extension import db
 from ..db_models import Tag, Channel
 
 from ..youtube import youtube_data as yt_data
+from music_feed.config import app_config
 
 
 ###########################################################################################
@@ -141,7 +142,7 @@ def handle_form_tags(channel, tags_name: list[str]):
 
 def extract_channel_id(channel_string):
     yt_id = None
-    
+
     # Can be:
     # - just the channel ID
     # - video URL from channel
@@ -197,3 +198,88 @@ def handle_import_channel(request):  # TODO add error handling
 
         db.session.commit()
         # db.session.rollback()
+
+
+###########################################################################################
+# Get Channels using filter tags
+###########################################################################################
+def _get_Channels_Tagged_v1(filter_tag_id: int) -> list[Channel]:
+    if filter_tag_id is None:
+        filter_tag_id = -1
+
+    if filter_tag_id < 0:
+        all_channels = Channel.get_all_latest()
+
+        # Get all channels
+        if filter_tag_id == -1:
+            return all_channels
+
+        # Get untagged channels
+        if filter_tag_id == -2:
+            untagged_channels = []
+            for channel in all_channels:
+                channel: Channel
+                tags = channel.tags
+
+                if len(tags) == 0:
+                    untagged_channels.append(channel)
+
+            return untagged_channels
+
+    # Get filtered channels
+
+    filter_tag: Tag = Tag.get_by_ID(filter_tag_id)
+
+    tagged_channels = []
+
+    if filter_tag:
+        tagged_channels = filter_tag.channels
+
+        tagged_channels = sorted(
+            tagged_channels, key=lambda x: x.id, reverse=True)
+
+    return tagged_channels
+
+
+def _get_next_channels(channel_list: list[Channel], last_channel_id: int | None = None) -> list[Channel]:
+    if not isinstance(last_channel_id, int):
+        return channel_list
+
+    last_channel = Channel.query.filter_by(
+        id=last_channel_id).first()
+
+    if last_channel:
+        cut_off_idx = 0
+        for idx, channel in enumerate(channel_list):
+            if channel.id >= last_channel_id:
+                cut_off_idx = idx
+
+        cut_off_idx = cut_off_idx + 1
+        # print("cut_off_idx: ", cut_off_idx)
+        # print("list length: ", len(tagged_uploads))
+        if len(channel_list) > cut_off_idx:
+            channel_list = channel_list[cut_off_idx:]
+        # print("list length: ", len(tagged_uploads))
+
+    return channel_list
+
+
+def _limit_channels_list(channel_list: list[Channel]):
+    if len(channel_list) > app_config.yt_feed.channels_per_page:
+        channel_list = channel_list[:app_config.yt_feed.channels_per_page]
+
+    return channel_list
+
+
+def get_Channels_Tagged_dict(last_channel_id: int | None = None, filter_tag_id: int | None = None) -> list[dict]:
+
+    channels = _get_Channels_Tagged_v1(filter_tag_id)
+    channels = _get_next_channels(channels, last_channel_id)
+    channels = _limit_channels_list(channels)
+
+    channel_list = []
+    for channel in channels:
+        channel: Channel
+        channel_list.append(channel.toDict(include_tags=True))
+
+    return channel_list

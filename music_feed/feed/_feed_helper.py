@@ -3,7 +3,6 @@ from ..db_models import Tag, Channel, Upload
 from music_feed.config import app_config
 
 
-
 ######################################################################################################
 
 
@@ -78,7 +77,8 @@ def _get_Tagged_Uploads_v1(last_upload_idx: int | None = None, filter_tag_id: in
                 # print("list length: ", len(tagged_uploads))
 
         if len(tagged_uploads) > app_config.yt_feed.uploads_per_page:
-            tagged_uploads = tagged_uploads[:app_config.yt_feed.uploads_per_page]
+            tagged_uploads = tagged_uploads[:
+                                            app_config.yt_feed.uploads_per_page]
 
         # print("list length: ", len(tagged_uploads))
         # print()
@@ -144,4 +144,3 @@ def get_Channels_Tagged_dict(filter_tag_id: int | None = None) -> list[Upload]:
         channel_list.append(channel.toDict(include_tags=True))
 
     return channel_list
-

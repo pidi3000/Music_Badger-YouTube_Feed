@@ -74,12 +74,14 @@ class Flask_Config(Badger_Config_Section):
 
 class Feed_Config(Badger_Config_Section):
     uploads_per_page: int
+    channels_per_page: int
 
     use_api: bool
     YT_API_KEY: str
 
     def setup(self):
         self.uploads_per_page = 4*20
+        self.channels_per_page = 20
 
         self.use_api = True
         self.YT_API_KEY = ""
