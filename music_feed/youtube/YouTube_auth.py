@@ -57,7 +57,7 @@ def del_yt_credentials():
 
 def get_authorized_yt_obj():
     if 'credentials_MAIN' not in flask.session:
-        return flask.redirect('authorize')
+        return None, flask.redirect("/authorize")
 
     # Load credentials from the session.
     credentials = google.oauth2.credentials.Credentials(
@@ -71,7 +71,7 @@ def get_authorized_yt_obj():
     #              credentials in a persistent database instead.
     flask.session['credentials_MAIN'] = _credentials_to_dict(credentials)
 
-    return youtube
+    return youtube, None
 
 
 @youtube_auth_pages.route('/authorize')

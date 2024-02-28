@@ -9,6 +9,7 @@ from flask import render_template, request, url_for, redirect, jsonify
 
 
 from . import blueprint as channel_pages
+from music_feed.youtube import youtube_data
 
 
 @channel_pages.route('/')
@@ -92,6 +93,30 @@ def edit_tags(channel_id):
     # return redirect(url_for('.index', **request.args))
 
 
+######################################################################################################
+@channel_pages.get('/<int:channel_id>/refresh_pfp/')
+def refresh_pfp(channel_id):
+    # Refresh a chanels profile picture
+    channel = Channel.query.get_or_404(channel_id)
+    channel: Channel
+
+    pfp_url, redirect_res = youtube_data.get_channel_pfp_url(yt_channel_id=channel.yt_id)
+    
+    if redirect_res is not None:
+        return redirect_res
+    
+    if pfp_url is None:
+        raise LookupError(f"no pfp URL found: {channel}")
+        
+    
+    print(f"Old: {channel.profile_img_url}\nNew: {pfp_url}")
+    channel.profile_img_url = pfp_url
+
+    db.session.commit()
+
+    return redirect(url_for(".index"))
+
+
 @channel_pages.post('/<int:channel_id>/delete/')
 def delete(channel_id):
     channel = Channel.query.get_or_404(channel_id)
@@ -107,8 +132,8 @@ def delete(channel_id):
 
     return redirect(url_for('.index'))
 
-######################################################################################################
 
+######################################################################################################
 
 @channel_pages.route('/page', methods=('GET', ))
 def get_page():
