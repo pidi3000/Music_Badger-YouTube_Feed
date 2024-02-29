@@ -212,10 +212,13 @@ def extract_channel_id_v2(channel_string_raw: str):
 
     # Loop through patterns to find a match
 
-    if "youtube.com/" in channel_string:
-        channel_string = channel_string.split("youtube.com/", 1)[1]
-    elif "youtu.be/" in channel_string:
-        channel_string = channel_string.split("youtu.be/", 1)[1]
+    if "youtube.com" in channel_string:
+        channel_string = channel_string.split("youtube.com", 1)[1]
+    elif "youtu.be" in channel_string:
+        channel_string = channel_string.split("youtu.be", 1)[1]
+        
+    channel_string = channel_string.removeprefix("/")
+    channel_string = channel_string.removeprefix("/")
 
     print("#"*20)
     print()
@@ -240,11 +243,13 @@ def extract_channel_id_v2(channel_string_raw: str):
     # From Handle URL
     else:
     # elif channel_string.startswith("@"):
-        print("From channel handle")
+        pattern = r'^@?[a-zA-Z0-9_.-]{3,}$'
 
-        channel_handle = channel_string
+        if bool(re.match(pattern, channel_string)):
+            print("From channel handle")
+            channel_handle = channel_string
 
-        yt_id = yt_data.get_channel_ID_from_handle(handle=channel_handle)
+            yt_id = yt_data.get_channel_ID_from_handle(handle=channel_handle)
 
     print(f"{channel_string_raw=}")
     print(f"{channel_string=}")
