@@ -14,7 +14,7 @@ from google.auth.exceptions import RefreshError
 def get_channel_ID_from_video(video_id):
     # Create a YouTube Data API service
     youtube, redirect = get_authorized_yt_obj()
-    
+
     if redirect is not None:
         return None
 
@@ -27,16 +27,44 @@ def get_channel_ID_from_video(video_id):
     # Extract channel ID from video details
     if 'items' not in video_response or len(video_response['items']) < 1:
         raise LookupError(f"no youtube video found with {video_id=}")
-    
+
     channel_id = video_response['items'][0]['snippet']['channelId']
     return channel_id
 
-def get_channel_id_from_username(username:str):
-    
-    username = username.removeprefix("@").strip()
-    
+
+def get_channel_ID_from_handle(handle):
+
     youtube, redirect = get_authorized_yt_obj()
-    
+
+    if redirect is not None:
+        return None
+
+    request = youtube.channels().list(
+        part="snippet",
+        forHandle=handle
+    )
+    response = request.execute()
+
+    # print(response)
+    yt_id = None
+
+    try:
+        yt_id = response["items"][0]["id"]
+
+    except KeyError as e:
+        print(e)
+        error_msg = "ERROR: no youtube data found"
+        print(error_msg)
+
+    return yt_id
+
+
+def get_channel_ID_from_username(username: str):
+
+    username = username.removeprefix("@").strip()
+
+    youtube, redirect = get_authorized_yt_obj()
+
     if redirect is not None:
         return None
 
@@ -49,7 +77,7 @@ def get_channel_id_from_username(username:str):
 
     if 'items' not in response or len(response['items']) < 0:
         raise LookupError(f"no youtube channel found with {username=}")
-    
+
     return response['items'][0]['id']
     # else:
     #     return None
@@ -63,7 +91,7 @@ def get_channel_data(channel_id):
     }
 
     youtube, redirect = get_authorized_yt_obj()
-    
+
     if redirect is not None:
         return None
 
@@ -91,11 +119,12 @@ def get_channel_data(channel_id):
 
     return channel_data
 
+
 def get_channel_pfp_url(yt_channel_id) -> str:
     profile_img_url = None
 
     youtube, redirect = get_authorized_yt_obj()
-    
+
     if redirect is not None:
         return None, redirect
 
@@ -160,7 +189,7 @@ def _get_formated_subscriptions(raw_data):
 def get_all_subscriptions():
     try:
         youtube, redirect = get_authorized_yt_obj()
-    
+
         if redirect is not None:
             return None
 
