@@ -10,11 +10,11 @@
     </p>
 
     <p>
-        <label for="yt_id">Channel ID</label>
-        <input type="text" name="yt_id" placeholder="YouTube ID">
+        <label for="yt_id">Channel Link</label>
+        <input type="text" name="yt_id" placeholder="YouTube Channel Link">
     </p>
 
-    <label for="tags">Choose a Tags:</label>
+    <label for="tags">Choose Tags:</label>
     <select name="tags" id="tags" multiple>
         {% for tag in tags %}
     
@@ -28,5 +28,17 @@
         <button type="submit">Submit</button>
     </p>
 </form>
+<div style="color: white;">
+    A Channel Link can look like this: <br>
+    <br>
+    - watch?v=VIDEO_ID (can have more URL parameters)<br>
+    - channel/CHANNEL_ID<br>
+    - CHANNEL_ID (MUST start with 'UC' otherwise assumed to be handle)<br>
+    - @CHANNEL_HANDLE (the '@' is recommended but not needed)<br>
+    <br>
+    All of those can be preceded by <br>
+    "youtube.com/" or <br>
+    "youtu.be"<br>
+</div>
 
 {% endblock %}

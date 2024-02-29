@@ -16,7 +16,8 @@ from music_feed.config import app_config
 # TODO remove tags_old use channel.tags instead
 def handle_form(channel, form, tags_old):
     name = form['name']
-    yt_id = extract_channel_id(form["yt_id"])
+    # yt_id = extract_channel_id(form["yt_id"])
+    yt_id = extract_channel_id_v2(form["yt_id"])
 
     if len(yt_id) < 1:
         error_msg = "ERROR: no youtube channel ID"
@@ -150,10 +151,25 @@ def extract_channel_id(channel_string):
 
     # Regular expressions to match different YouTube channel URL formats
     patterns = [
-        r'(?:https?://)?(?:www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+)',
-        r'(?:https?://)?(?:www\.)?youtube\.com/channel/([a-zA-Z0-9_-]+)',
-        r'([a-zA-Z0-9_-]+)',
+        # Video URL
+        r'(?:https?://(?:www\.)?)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+)',
+        # r'(?:https?://)?(?:www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+)',
+
+        # r'(?:https?://)?:www\.)?)?youtube\.com/channel/([a-zA-Z0-9_-]+)',
+        # r'(?:https?://)?(?:www\.)?youtube\.com/channel/([a-zA-Z0-9_-]+)',
+
+        # r'(?:https?://(?:www\.)?youtube\.com/channel/)?([a-zA-Z0-9_-]+)',   #  ID URL
+        r'(?:youtube\.com/(?:channel/)?)?(@?[a-zA-Z0-9_-]+)',  # ID URL
+        # r'(?:(?https?://)?(?:www\.)?youtube\.com/(?:channel/)?)?(@?[a-zA-Z0-9_-]+)',   #  ID URL
+        # r'(?:https?://(?:www\.)?youtube\.com/(?:channel/)?)(@?[a-zA-Z0-9_-]+)'
+
+        # r'(?:https?://(?:www\.)?youtube\.com/)?(@?[a-zA-Z0-9_-]+)',         #  Handle URL
+        # r'(@?[a-zA-Z0-9_-]+)',
     ]
+
+    # https://www.youtube.com/@MrSuicideSheep
+    # https://www.youtube.com/channel/@channel_handle
+    # https://www.youtube.com/watch?v=abcdefghijk
 
     # Loop through patterns to find a match
     for pattern in patterns:
@@ -162,9 +178,79 @@ def extract_channel_id(channel_string):
             yt_id = match.group(1)
 
             if pattern == patterns[0]:  # matched the video URL pattern
-                yt_id = yt_data.get_channel_ID_from_video(video_id=yt_id)
+                pass
+                # yt_id = yt_data.get_channel_ID_from_video(video_id=yt_id)
 
             break
+
+    print("#"*20)
+    print()
+    print(f"{channel_string=}")
+    print(f"{yt_id=}")
+    print(f"{pattern=}")
+    print()
+    print("#"*20)
+
+    if yt_id is None:
+        raise LookupError("No channel or video ID pattern matched")
+
+    return yt_id
+
+
+def extract_channel_id_v2(channel_string_raw: str):
+    yt_id = None
+    channel_string = channel_string_raw
+
+    # Can be:
+    # - just the channel ID
+    # - video URL from channel
+    # - channel URL ONLY if the ID is contained (NOT a custom URL like @mychannelname)
+
+    # https://www.youtube.com/@MrSuicideSheep
+    # https://www.youtube.com/channel/@channel_handle
+    # https://www.youtube.com/watch?v=abcdefghijk
+
+    # Loop through patterns to find a match
+
+    if "youtube.com/" in channel_string:
+        channel_string = channel_string.split("youtube.com/", 1)[1]
+    elif "youtu.be/" in channel_string:
+        channel_string = channel_string.split("youtu.be/", 1)[1]
+
+    print("#"*20)
+    print()
+    # From channel ID URL
+    if channel_string.startswith("channel/") or channel_string.startswith("UC"):
+        print("From channel ID URL")
+
+        channel_string = channel_string.removeprefix("channel/")
+        yt_id = channel_string
+        pass
+
+    # From channel Video URL
+    elif channel_string.startswith("watch?"):
+        print("From channel Video URL")
+
+        channel_string = channel_string.removeprefix("watch?")
+        channel_string = channel_string.split("v=", 1)[1]
+        video_id = channel_string.split("&", 1)[0]
+
+        yt_id = yt_data.get_channel_ID_from_video(video_id=video_id)
+
+    # From Handle URL
+    else:
+    # elif channel_string.startswith("@"):
+        print("From channel handle")
+
+        channel_handle = channel_string
+
+        yt_id = yt_data.get_channel_ID_from_handle(handle=channel_handle)
+
+    print(f"{channel_string_raw=}")
+    print(f"{channel_string=}")
+    print(f"{yt_id=}")
+    print()
+    print("#"*20)
 
     if yt_id is None:
         raise LookupError("No channel or video ID pattern matched")
