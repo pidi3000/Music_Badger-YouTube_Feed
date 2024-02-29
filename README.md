@@ -17,7 +17,7 @@ A new channel entry can be created using:
 - the channel ID
 - the channel handle
 
-regardless of the following rules if the `Channel Link` field contains the domains
+regardless of the following rules, if the `Channel Link` field contains the domains
 `youtube.com` or `youtu.be`, they and everything before will be removed.
 
 ### from video
@@ -42,7 +42,9 @@ When creating using the channel ID the `Channel Link` field must:
 
 When creating using the channel handle the `Channel Link` field must:
 
-- only be the channel handle, startinn with `@` is recommended
+- only be the channel handle (starting with `@` is recommended), AND
+- be more than 3 characters long (excluding `@`), AND
+- only contain the characters A–Z, a–z, 0–9, underscores (_), hyphens (-), periods (.)
 
 ### Examples
 
@@ -51,7 +53,7 @@ Good:
 - `youtube.com/watch?v=VIDEO_ID`
 - `watch?si=xyz&v=VIDEO_ID`
 - `channel/CHANNEL_ID`
-- `UCabc` (id starting with 'UC')
+- `UCabc` (CHANNEL_ID MUST start with 'UC')
 - `https://youtu.be/CHANNEL_HANDLE`
 - `youtube.com/@CHANNEL_HANDLE`
 - `@CHANNEL_HANDLE`
@@ -59,5 +61,7 @@ Good:
 
 Bad:
 
-- `abc` (will be interpreted as channel handle)
-- `v=VIDEO_ID`
+- `CHANNEL_ID` (starting without `UC`, will be interpreted as channel handle)
+- `@ab` (too short)
+- `@abcd!` (not allowed characters)
+- `v=VIDEO_ID` (missing the path `watch?`)
