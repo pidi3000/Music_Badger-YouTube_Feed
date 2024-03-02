@@ -2,7 +2,7 @@
 // https://stackoverflow.com/questions/10059888/detect-when-scroll-reaches-the-bottom-of-the-page-without-jquery
 // https://jsfiddle.net/W75mP/
 
-const page_end_event = new CustomEvent("page-end", { "detail": "Example of an event", "bubbles": true });
+const page_end_event = new CustomEvent("page-end", { "detail": "End of page reached", "bubbles": true });
 
 // document.onscroll = function () {
 document.addEventListener("scroll", function (event) {
