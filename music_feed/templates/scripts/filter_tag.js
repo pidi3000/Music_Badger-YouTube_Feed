@@ -1,7 +1,7 @@
 
 
 
-var current_filter_tag_id = -1;
+var current_filter_tag_id = null;
 
 var data_reload_event = new CustomEvent(
     "reload-filter-data",
@@ -67,6 +67,7 @@ function filter_by_URL_Parameter() {
     filter_tag = get_Filter_URL_Parameter();
 
     if (filter_tag != null) set_tagID_filtered(filter_tag);
+    else set_tagID_filtered(-1);
 }
 
 function update_tagID_filtered() {

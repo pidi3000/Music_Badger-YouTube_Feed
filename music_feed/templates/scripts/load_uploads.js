@@ -7,7 +7,7 @@ document.addEventListener("page-end", function (e) {
 });
 
 document.addEventListener("reload-filter-data", function (e) {
-    console.log(e.detail); // Prints "Example of an event"
+    console.log(e.detail);
     reload_uploads();
 });
 
@@ -186,6 +186,3 @@ function update_uploads() {
 
 }
 
-
-
-get_more_uploads();
