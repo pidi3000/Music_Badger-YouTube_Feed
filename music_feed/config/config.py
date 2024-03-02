@@ -78,6 +78,7 @@ class Feed_Config(Badger_Config_Section):
 
     use_api: bool
     YT_API_KEY: str
+    YT_CLIENT_SECRET_PATH: Path
 
     def setup(self):
         self.uploads_per_page = 4*20
@@ -85,6 +86,18 @@ class Feed_Config(Badger_Config_Section):
 
         self.use_api = True
         self.YT_API_KEY = ""
+        self.YT_CLIENT_SECRET_PATH = Path("client_secret_youtube.json")
+
+    def post_process(self):
+        self.YT_CLIENT_SECRET_PATH = self.make_absolute_to_root(
+            relative_path=self.YT_CLIENT_SECRET_PATH,
+            enforce_in_root=True
+        )
+
+    def pre_process(self):
+        self.YT_CLIENT_SECRET_PATH = self.make_relative_to_root(
+            absolute_path=self.YT_CLIENT_SECRET_PATH
+        )
 
 
 class Config(Badger_Config_Base):
