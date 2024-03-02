@@ -210,6 +210,3 @@ function reload_channels() {
     get_more_channels();
 }
 
-
-
-get_more_channels();
