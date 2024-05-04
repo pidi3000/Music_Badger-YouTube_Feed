@@ -158,6 +158,10 @@ function get_more_channels() {
         return
     }
 
+    
+    // 
+    // Change this entire section to use the URL/URLSearchParams class or something like that
+    // 
     new_update_url = channel_get_url + "?";
 
     if (last_channel_id != null) {
@@ -167,6 +171,23 @@ function get_more_channels() {
     if (current_filter_tag_id != null) {
         new_update_url = new_update_url + "&filter_tag=" + current_filter_tag_id;
     }
+
+    const queryString = window.location.search;
+    console.log(queryString);
+
+    const urlParams = new URLSearchParams(queryString);
+    sort_field = urlParams.get("sort_field");
+    sort_asc = urlParams.get("sort_asc");
+    
+
+    if (sort_field != null) {
+        new_update_url = new_update_url + "&sort_field=" + sort_field;
+    }
+
+    if (sort_asc != null) {
+        new_update_url = new_update_url + "&sort_asc=" + sort_asc;
+    }
+    
 
     console.log(new_update_url);
     console.log(current_filter_tag_id);

@@ -100,15 +100,15 @@ def refresh_pfp(channel_id):
     channel = Channel.query.get_or_404(channel_id)
     channel: Channel
 
-    pfp_url, redirect_res = youtube_data.get_channel_pfp_url(yt_channel_id=channel.yt_id)
-    
+    pfp_url, redirect_res = youtube_data.get_channel_pfp_url(
+        yt_channel_id=channel.yt_id)
+
     if redirect_res is not None:
         return redirect_res
-    
+
     if pfp_url is None:
         raise LookupError(f"no pfp URL found: {channel}")
-        
-    
+
     print(f"Old: {channel.profile_img_url}\nNew: {pfp_url}")
     channel.profile_img_url = pfp_url
 
@@ -140,11 +140,24 @@ def get_page():
     last_channel_id = request.args.get("last_channel_id", None, int)
     filter_tag_id = request.args.get("filter_tag", None, int)
 
-    print("last_channel_id: ", last_channel_id)
-    print("filter_tag_id: ", filter_tag_id)
+    # filter fields can be: name, date_added, date_subbed
+    sort_field = request.args.get("sort_field", "date_added", str)
+    # true means ascending/oldest first. false is newest first
+    sort_asc = request.args.get("sort_asc", False, bool)
+
+    print(request.args)
+
+    # print("last_channel_id: ", last_channel_id)
+    # print("filter_tag_id: ", filter_tag_id)
+    print(f"{last_channel_id=}")
+    print(f"{filter_tag_id=}")
+    print(f"{sort_field=}")
+    print(f"{sort_asc=}")
 
     channels = _channel_helper.get_Channels_Tagged_dict(
-        last_channel_id, filter_tag_id)
+        last_channel_id, filter_tag_id,
+        sort_field, sort_asc
+    )
 
     tags = []
 
