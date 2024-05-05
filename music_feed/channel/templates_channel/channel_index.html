@@ -4,6 +4,27 @@
 
 <link type="text/css" rel="stylesheet" href="/style/chanel_index_v2.css">
 <link type="text/css" rel="stylesheet" href="/style/dropdown_menu.css">
+<style>
+    /* Some basic styling for the navbar */
+    .navbar {
+        background-color: #333;
+        overflow: hidden;
+    }
+    
+    .navbar a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+    }
+    
+    .navbar a:hover {
+        background-color: #ddd;
+        color: black;
+    }
+</style>
 
 <h1 class="title" data-autoset-text-color="true">{% block title %} Channels V3 {% endblock %}</h1>
 
@@ -29,6 +50,11 @@
     Save All
 </button>
 
+<div class="navbar">
+    <a href="#" onclick="sortData('name')">Sort by Name</a>
+    <a href="#" onclick="sortData('id')">Sort by ID</a>
+    <a href="#" onclick="invertDirection()">Invert Direction</a>
+</div>
 
 <template id="channel_template">
 
@@ -103,5 +129,30 @@
 <script src="/scripts/edit_tags.js"></script>
 
 <script src="/scripts/load_channels.js"></script>
+
+
+<script>
+    // Function to set sort field and reload page
+    function sortData(field) {
+        // Set sort_field parameter in the URL
+        var url = new URL(window.location.href);
+        url.searchParams.set('sort_field', field);
+        window.location.href = url.toString();
+    }
+
+    // Function to invert sorting direction
+    function invertDirection() {
+        // Get current value of sort_asc parameter from URL
+        var url = new URL(window.location.href);
+        var sortAsc = url.searchParams.get('sort_asc');
+        
+        // Toggle sort_asc between true and false
+        sortAsc = sortAsc === 'true' ? 'false' : 'true';
+
+        // Set sort_asc parameter in the URL
+        url.searchParams.set('sort_asc', sortAsc);
+        window.location.href = url.toString();
+    }
+</script>
 
 {% endblock %}
