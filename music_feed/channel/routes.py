@@ -143,7 +143,14 @@ def get_page():
     # filter fields can be: name, date_added, date_subbed
     sort_field = request.args.get("sort_field", "date_added", str)
     # true means ascending/oldest first. false is newest first
-    sort_asc = request.args.get("sort_asc", False, bool)
+    sort_asc = request.args.get("sort_asc", False)
+    if isinstance(sort_asc, str):
+        if sort_asc == "true":
+            sort_asc = True
+        else:
+            sort_asc = False
+    else:
+        sort_asc = bool(sort_asc)
 
     print(request.args)
 

@@ -69,12 +69,14 @@ class Channel(db.Model):
             else:
                 return Channel.query.order_by(Channel.name.desc()).all()
 
-        if sort_field == "date_added":
+        if sort_field == "date_added" or sort_field == "id":
             if sort_asc:
                 return Channel.query.order_by(Channel.id.asc()).all()
             else:
                 return Channel.query.order_by(Channel.id.desc()).all()
 
+
+        raise ValueError(f"unknown sort_field: '{sort_field}'")
     # https://stackoverflow.com/questions/35814211/how-to-add-a-custom-function-method-in-sqlalchemy-model-to-do-crud-operations
 
     @classmethod
