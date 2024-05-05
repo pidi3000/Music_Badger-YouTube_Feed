@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 
 import flask
+import requests
 
 import xmltodict
 import json
@@ -114,6 +115,8 @@ def _handle_upload_raw_api(channel_Data_Raw, channel_id: int, channel_name: str)
         videoUploadTime = videoUploadTime.split("Z")[0] + "+00:00"
         upload_dateTime = datetime.fromisoformat(videoUploadTime)
 
+        is_short = _check_video_is_short(video_ID=videoID)
+
         #####################################################################################################
         upload = Upload.create(
             yt_id=videoID,
@@ -121,6 +124,7 @@ def _handle_upload_raw_api(channel_Data_Raw, channel_id: int, channel_name: str)
             title=videoTitle,
             thumbnail_url=thumbnailURL,
             dateTime=upload_dateTime,
+            is_short=is_short,
             add_to_session=False
         )
 
@@ -197,6 +201,8 @@ def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int):
         upload_date = str(videoUploadTime).split("+", 1)[0]
         upload_dateTime = datetime.strptime(upload_date, YT_DATE_FORMAT)
 
+        is_short = _check_video_is_short(video_ID=videoID)
+
         #####################################################################################################
         upload = Upload.create(
             yt_id=videoID,
@@ -204,6 +210,7 @@ def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int):
             title=videoTitle,
             thumbnail_url=thumbnailURL,
             dateTime=upload_dateTime,
+            is_short=is_short,
             add_to_session=False
         )
 
@@ -216,6 +223,13 @@ def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int):
 ##################################################
 # Async stuff
 ##################################################
+def _check_video_is_short(video_ID: str):
+    url = 'https://www.youtube.com/shorts/' + video_ID
+    ret = requests.head(url)
+    # whether 303 or other values, it's not short
+    return ret.status_code == 200
+
+
 async def _update_channel(session, channel: Channel):
     data = {}
     api_errors = None
