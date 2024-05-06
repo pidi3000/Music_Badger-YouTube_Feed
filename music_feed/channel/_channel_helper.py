@@ -216,7 +216,7 @@ def extract_channel_id_v2(channel_string_raw: str):
         channel_string = channel_string.split("youtube.com", 1)[1]
     elif "youtu.be" in channel_string:
         channel_string = channel_string.split("youtu.be", 1)[1]
-        
+
     channel_string = channel_string.removeprefix("/")
     channel_string = channel_string.removeprefix("/")
 
@@ -242,7 +242,7 @@ def extract_channel_id_v2(channel_string_raw: str):
 
     # From Handle URL
     else:
-    # elif channel_string.startswith("@"):
+        # elif channel_string.startswith("@"):
         pattern = r'^@?[a-zA-Z0-9_.-]{3,}$'
 
         if bool(re.match(pattern, channel_string)):
@@ -294,12 +294,12 @@ def handle_import_channel(request):  # TODO add error handling
 ###########################################################################################
 # Get Channels using filter tags
 ###########################################################################################
-def _get_Channels_Tagged_v1(filter_tag_id: int) -> list[Channel]:
+def _get_Channels_Tagged_v1(filter_tag_id: int, sort_field: str = "date_added", sort_asc: bool = False) -> list[Channel]:
     if filter_tag_id is None:
         filter_tag_id = -1
 
     if filter_tag_id < 0:
-        all_channels = Channel.get_all_latest()
+        all_channels = Channel.get_all_sorted(sort_field, sort_asc)
 
         # Get all channels
         if filter_tag_id == -1:
@@ -326,8 +326,17 @@ def _get_Channels_Tagged_v1(filter_tag_id: int) -> list[Channel]:
     if filter_tag:
         tagged_channels = filter_tag.channels
 
-        tagged_channels = sorted(
-            tagged_channels, key=lambda x: x.id, reverse=True)
+        if sort_field == "name":
+            tagged_channels = sorted(
+                tagged_channels, key=lambda x: x.name, reverse=not sort_asc)
+
+        # elif sort_field == "date_added":
+        #     tagged_channels = sorted(
+        #         tagged_channels, key=lambda x: x.id, reverse=not sort_asc)
+
+        else:
+            tagged_channels = sorted(
+                tagged_channels, key=lambda x: x.id, reverse=True)
 
     return tagged_channels
 
@@ -342,7 +351,7 @@ def _get_next_channels(channel_list: list[Channel], last_channel_id: int | None 
     if last_channel:
         cut_off_idx = 0
         for idx, channel in enumerate(channel_list):
-            if channel.id >= last_channel_id:
+            if channel.id == last_channel_id:
                 cut_off_idx = idx
 
         cut_off_idx = cut_off_idx + 1
@@ -362,9 +371,14 @@ def _limit_channels_list(channel_list: list[Channel]):
     return channel_list
 
 
-def get_Channels_Tagged_dict(last_channel_id: int | None = None, filter_tag_id: int | None = None) -> list[dict]:
+def get_Channels_Tagged_dict(
+    last_channel_id: int | None = None,
+    filter_tag_id: int | None = None,
+    sort_field: str = "date_added",
+    sort_asc: bool = False
+) -> list[dict]:
 
-    channels = _get_Channels_Tagged_v1(filter_tag_id)
+    channels = _get_Channels_Tagged_v1(filter_tag_id, sort_field, sort_asc)
     channels = _get_next_channels(channels, last_channel_id)
     channels = _limit_channels_list(channels)
 
