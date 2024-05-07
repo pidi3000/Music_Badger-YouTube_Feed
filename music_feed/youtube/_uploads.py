@@ -146,8 +146,8 @@ async def _update_channel_rss(session, channel: Channel):
         # response.raise_for_status()
         if response.status == 200:
             data = await response.text()
-            num_uploads, channel_Uploads = _handle_upload_raw_rss(
-                data, channel_id=channel.id)
+            num_uploads, channel_Uploads = await _handle_upload_raw_rss(
+                data, channel_id=channel.id, session=session)
             errors = None
         else:
             # errors = f"Error: {response.status} - {await response.text()}"
@@ -166,7 +166,7 @@ async def _update_channel_rss(session, channel: Channel):
         }
 
 
-def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int):
+async def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int, session):
     channel_Data = xmltodict.parse(channel_Data_Raw)
 
     channel_Data_Feed = channel_Data["feed"]
@@ -201,7 +201,8 @@ def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int):
         upload_date = str(videoUploadTime).split("+", 1)[0]
         upload_dateTime = datetime.strptime(upload_date, YT_DATE_FORMAT)
 
-        is_short = _check_video_is_short(video_ID=videoID)
+        # print(f"checking is short: {channel_Title} - {videoID}")
+        is_short = await _check_video_is_short_rss(video_ID=videoID, session=session)
 
         #####################################################################################################
         upload = Upload.create(
@@ -223,6 +224,16 @@ def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int):
 ##################################################
 # Async stuff
 ##################################################
+async def _check_video_is_short_rss(video_ID: str, session) -> bool:
+    url = 'https://www.youtube.com/shorts/' + video_ID
+    async with session.head(url) as response:
+        # response.raise_for_status()
+        if response.status == 200:
+            return True
+
+    return False
+
+
 def _check_video_is_short(video_ID: str):
     url = 'https://www.youtube.com/shorts/' + video_ID
     ret = requests.head(url)
@@ -231,6 +242,7 @@ def _check_video_is_short(video_ID: str):
 
 
 async def _update_channel(session, channel: Channel):
+    print(f"starting channel: {channel.name}")
     data = {}
     api_errors = None
 
@@ -242,6 +254,7 @@ async def _update_channel(session, channel: Channel):
 
             # no errors
             if not (data["api_errors"] is not None and len(data["api_errors"]) > 0):
+                print(f"finnished channel: {channel.name}")
                 return data
 
             api_errors = data["api_errors"]
@@ -252,6 +265,8 @@ async def _update_channel(session, channel: Channel):
     # config use_api is false or api had error
     data = await _update_channel_rss(session, channel)
     data["api_errors"] = api_errors
+
+    print(f"finnished channel: {channel.name}")
 
     return data
 
@@ -317,7 +332,12 @@ def update_all_async():
     print()
     print()
 
-    with open("data_dev/errors.json", "w") as f:
+    from pathlib import Path
+    data_dev_dir = Path("data_dev")
+    if not data_dev_dir.is_dir():
+        data_dev_dir.mkdir(exist_ok=True)
+    
+    with open(data_dev_dir.joinpath("errors.json"), "w") as f:
         json.dump(errors, f, indent=4)
 
     return num_uploads
