@@ -33,7 +33,7 @@ class _Base_Mixin(object):
 from ._channel import Channel
 from ._tag import Tag
 from ._upload import Upload
-from ._yt_credentials import YT_Credentials
+# from ._yt_credentials import YT_Credentials
 
 
 

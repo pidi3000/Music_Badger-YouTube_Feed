@@ -6,8 +6,9 @@ import os
 
 from flask import Flask, render_template, Response, url_for, redirect
 from flask_session import Session
+from flask_migrate import Migrate
 
-from .extension import db
+from .extension import db, migrate
 
 
 def _register_all_blueprints(app: Flask):
@@ -66,9 +67,11 @@ def _register_base_routes(app: Flask):
 def _init_db(app: Flask):
     db.init_app(app)
 
+    migrate.init_app(app, db)
+
     from . import db_models
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
 
 
 def _init_config(app: Flask):
@@ -85,6 +88,7 @@ def _init_config(app: Flask):
 
 def _init_session(app: Flask):
     Session(app)
+
 
 def init_with_app(app: Flask):
     # print(app.config["SQLALCHEMY_DATABASE_URI"])

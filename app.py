@@ -1,10 +1,14 @@
 APP_VERSION = "1.5.1"
 
+####################################################################################################
+def create_app():
+    import music_feed
+    app = music_feed.create_app()
+
+    return app
 
 def main():
-    import music_feed
-
-    app = music_feed.create_app()
+    app = create_app()
 
     print(app.url_map)
 
