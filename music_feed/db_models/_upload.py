@@ -3,6 +3,7 @@ from . import _Base_Mixin
 from ..help_functions import get_relative_time, get_time_group
 
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql import expression
 
 
 class Upload(db.Model, _Base_Mixin):
@@ -19,7 +20,7 @@ class Upload(db.Model, _Base_Mixin):
     thumbnail_url = db.Column(db.String(200), nullable=False)
     dateTime = db.Column(db.DateTime, nullable=False)
 
-    is_short = db.Column(db.Boolean, nullable=False, default=False)
+    is_short = db.Column(db.Boolean, nullable=False, server_default=expression.false())
 
     def __repr__(self):
         return f'<Upload {self.title} {self.yt_id}>'
