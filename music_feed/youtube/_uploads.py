@@ -30,6 +30,10 @@ YT_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 # 2.3: group uploads, like 10 or something. (reduces the db.commit calls)
 ##################################################
 
+cookies = {
+    "SOCS": "XXXXXXXXXXX"
+}
+
 ##################################################
 # YT API method
 ##################################################
@@ -137,7 +141,7 @@ def _handle_upload_raw_api(channel_Data_Raw, channel_id: int, channel_name: str)
 ##################################################
 # RSS method
 ##################################################
-async def _update_channel_rss(session, channel: Channel):
+async def _update_channel_rss(session: aiohttp.ClientSession, channel: Channel):
     url = channel.feed_url
     num_uploads = 0
     channel_Uploads = []
@@ -166,7 +170,7 @@ async def _update_channel_rss(session, channel: Channel):
         }
 
 
-async def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int, session):
+async def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int, session: aiohttp.ClientSession):
     channel_Data = xmltodict.parse(channel_Data_Raw)
 
     channel_Data_Feed = channel_Data["feed"]
@@ -224,14 +228,11 @@ async def _handle_upload_raw_rss(channel_Data_Raw, channel_id: int, session):
 ##################################################
 # Async stuff
 ##################################################
-async def _check_video_is_short_rss(video_ID: str, session) -> bool:
+async def _check_video_is_short_rss(video_ID: str, session: aiohttp.ClientSession) -> bool:
     url = 'https://www.youtube.com/shorts/' + video_ID
     async with session.head(url) as response:
         # response.raise_for_status()
-        if response.status == 200:
-            return True
-
-    return False
+        return response.status == 200
 
 
 def _check_video_is_short(video_ID: str):
@@ -272,7 +273,7 @@ async def _update_channel(session, channel: Channel):
 
 
 async def _main(channels):
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(cookies=cookies) as session:
         tasks = [_update_channel(session, channel)
                  for channel in channels]
         responses = await asyncio.gather(*tasks)
@@ -287,6 +288,7 @@ def update_all_async():
 
     start_all = time.time()
 
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     all_channel_updates = asyncio.run(_main(channels))
 
     # channel_uploads = [video for channel in all_channel_updates for video in channel["uploads"]]
@@ -336,7 +338,7 @@ def update_all_async():
     data_dev_dir = Path("data_dev")
     if not data_dev_dir.is_dir():
         data_dev_dir.mkdir(exist_ok=True)
-    
+
     with open(data_dev_dir.joinpath("errors.json"), "w") as f:
         json.dump(errors, f, indent=4)
 
