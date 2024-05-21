@@ -76,17 +76,26 @@ class Feed_Config(Badger_Config_Section):
     uploads_per_page: int
     channels_per_page: int
 
-    use_api: bool
-    YT_API_KEY: str
-    YT_CLIENT_SECRET_PATH: Path
-
     def setup(self):
         self.uploads_per_page = 4*20
         self.channels_per_page = 20
 
+
+class YT_Config(Badger_Config_Section):
+    use_api: bool
+    YT_API_KEY: str
+    YT_CLIENT_SECRET_PATH: Path
+
+    methode_update_upload: str   # valid value "WEB", "API"
+    methode_check_video_type: str     # valid value "WEB", "API", "NONE"
+
+    def setup(self):
         self.use_api = True
         self.YT_API_KEY = ""
         self.YT_CLIENT_SECRET_PATH = Path("client_secret_youtube.json")
+
+        self.methode_update_upload = "WEB"
+        self.methode_check_video_type = "WEB"
 
     def post_process(self):
         self.YT_CLIENT_SECRET_PATH = self.make_absolute_to_root(
@@ -108,10 +117,12 @@ class Config(Badger_Config_Base):
 
     flask: Flask_Config
     yt_feed: Feed_Config
+    yt_config: YT_Config
 
     def __init__(self) -> None:
         self.flask = Flask_Config(section_name="flask")
         self.yt_feed = Feed_Config(section_name="yt_feed")
+        self.yt_config = YT_Config(section_name="yt_Config")
 
         super().__init__(
             config_file_path=self.config_file_path,

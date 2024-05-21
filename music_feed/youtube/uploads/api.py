@@ -25,7 +25,7 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
     def get_channel_uploads(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
         print(f"Start channel: {channel.name}")
 
-        YT_API_KEY = app_config.yt_feed.YT_API_KEY
+        YT_API_KEY = app_config.yt_config.YT_API_KEY
         if YT_API_KEY is None or len(YT_API_KEY.strip()) < 10:
             raise KeyError(f"YT_API_KEY mus be set to use API")
 
