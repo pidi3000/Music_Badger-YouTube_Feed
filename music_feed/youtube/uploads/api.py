@@ -1,13 +1,11 @@
 
 
-import aiohttp
-import asyncio
-
 import xmltodict
 import json
 
 import time
 from datetime import datetime
+
 from pyyoutube import Client
 from pyyoutube.models import (
     PlaylistItemListResponse,
@@ -21,18 +19,18 @@ from music_feed.db_models import Upload, Channel
 from music_feed.youtube.uploads._base import YT_Uploads_Handler_Base
 
 
-class YT_Uploads_Handler_API():
+class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
     @classmethod
-    async def update_channel(cls, session: aiohttp.ClientSession, channel: Channel) -> tuple[list[Upload], dict | None]:
+    def update_channel(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
         print(f"Start channel: {channel.name}")
-        
+
         YT_API_KEY = app_config.yt_feed.YT_API_KEY
         if YT_API_KEY is None or len(YT_API_KEY.strip()) < 10:
             raise KeyError(f"YT_API_KEY mus be set to use API")
 
         cli = Client(api_key=YT_API_KEY)
-        
+
         # cli.session = session
 
         channel_Uploads = []
@@ -49,7 +47,7 @@ class YT_Uploads_Handler_API():
         )
 
         errors = None
-        
+
         print(f"Done channel: {channel.name} - {len(channel_Uploads)}")
 
         return (
@@ -63,7 +61,7 @@ class YT_Uploads_Handler_API():
         # if channel_upload_data.items is None:
         #     return []
 
-        channel_Uploads:list[Upload] = []
+        channel_Uploads: list[Upload] = []
 
         try:
             for item in raw_Data.items:
@@ -74,7 +72,8 @@ class YT_Uploads_Handler_API():
                     channel_id=channel.id,
                     title=item.snippet.title,
                     thumbnail_url=item.snippet.thumbnails.default.url,
-                    dateTime=item.contentDetails.string_to_datetime(item.contentDetails.videoPublishedAt),
+                    dateTime=item.contentDetails.string_to_datetime(
+                        item.contentDetails.videoPublishedAt),
                     add_to_session=False
                 )
 
@@ -100,8 +99,7 @@ class YT_Uploads_Handler_API():
 
             print(f"Channel update failed: {channel.name}")
             print(e)
-            
-            
+
         # channel_Uploads.sort(key=lambda x: x.dateTime)
 
         return channel_Uploads

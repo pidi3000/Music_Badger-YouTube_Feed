@@ -1,7 +1,6 @@
 
-
-import aiohttp
-import asyncio
+import requests
+from requests import Response
 
 import xmltodict
 import json
@@ -19,29 +18,31 @@ YT_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
 
     @classmethod
-    async def update_channel(cls, session: aiohttp.ClientSession, channel: Channel) -> tuple[list[Upload], dict]:
+    def update_channel(cls, channel: Channel) -> tuple[list[Upload], dict]:
         channel_Uploads = []
 
-        async with session.get(channel.feed_url) as response:
-            # response.raise_for_status()
-            raw_data = await response.text()
+        session = requests.Session()
 
-            if response.status == 200:
+        response = session.get(channel.feed_url)
+        # response.raise_for_status()
+        raw_data = response.text
 
-                channel_Uploads = cls._handle_raw_data(
-                    channel_Data_Raw=raw_data,
-                    channel=channel
-                )
+        if response.status_code == 200:
 
-                errors = None
+            channel_Uploads = cls._handle_uploads(
+                raw_Data=raw_data,
+                channel=channel
+            )
 
-            else:
-                # errors = f"Error: {response.status} - {await response.text()}"
-                errors = {}
-                errors["text"] = raw_data
-                errors["status"] = response.status
+            errors = None
 
-                errors["channel.name"] = channel.name
+        else:
+            # errors = f"Error: {response.status} - {await response.text()}"
+            errors = {}
+            errors["text"] = raw_data
+            errors["status"] = response.status_code
+
+            errors["channel.name"] = channel.name
 
         return (
             channel_Uploads,
@@ -49,8 +50,8 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
         )
 
     @classmethod
-    def _handle_raw_data(cls, channel_Data_Raw, channel: Channel) -> list[Upload]:
-        channel_Data = xmltodict.parse(channel_Data_Raw)
+    def _handle_uploads(cls, raw_Data, channel: Channel) -> list[Upload]:
+        channel_Data = xmltodict.parse(raw_Data)
 
         channel_Uploads = []
 
@@ -61,7 +62,7 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
         raw_uploads = []
         if "entry" in channel_Data_Feed:
             raw_uploads = channel_Data_Feed["entry"]
-            
+
             # if channel has only 1 video entry is a dict of the single upload, otherwise it's a list of videos
             if isinstance(raw_uploads, dict):
                 temp = list()

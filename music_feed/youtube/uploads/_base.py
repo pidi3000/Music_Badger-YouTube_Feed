@@ -1,20 +1,15 @@
 
-import aiohttp
-import asyncio
-
 from music_feed.db_models import Upload, Channel
 
 
 class YT_Uploads_Handler_Base():
 
     @classmethod
-    async def update_channel(cls, session: aiohttp.ClientSession, channel: Channel) -> tuple[list[Upload], dict | None]:
+    def update_channel(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
         """Upadete single channels uplaods
 
         Parameters
         ----------
-        session : aiohttp.ClientSession
-            the aiohttp client sessiont to use
         channel : Channel
             the channel to update
 
@@ -33,7 +28,7 @@ class YT_Uploads_Handler_Base():
         raise NotImplementedError("Derived class must implement this function")
 
     @classmethod
-    def _handle_raw_data(cls, channel_Data_Raw, channel: Channel) -> list[Upload]:
+    def _handle_uploads(cls, raw_Data, channel: Channel) -> list[Upload]:
         """Convert Raw data to `Upload` objects
 
         Parameters
@@ -55,4 +50,8 @@ class YT_Uploads_Handler_Base():
 
     @classmethod
     def _check_video_is_short(cls, upload_Data_Raw: dict, upload_id: int) -> bool:
+        raise NotImplementedError("Derived class must implement this function")
+
+    @classmethod
+    def _check_video_is_livestream(cls, upload_Data_Raw: dict, upload_id: int) -> bool:
         raise NotImplementedError("Derived class must implement this function")
