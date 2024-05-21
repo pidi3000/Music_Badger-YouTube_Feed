@@ -109,7 +109,7 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
             file_path = Path(f"data_dev/uploads/{channel.name}.json")
 
             file_path.parent.mkdir(parents=True, exist_ok=True)
-            file_path.touch()
+            # file_path.touch()
 
             with open(file_path, "a") as f:
                 f.write("\n\n")
@@ -121,3 +121,21 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
             print(e)
 
         return channel_Uploads
+
+    @classmethod
+    def check_videos_type(cls, uploads: list[Upload]) -> list[Upload]:
+
+        for upload in uploads:
+            is_short = cls._check_is_short(upload.yt_id)
+            upload.is_short = is_short
+
+        return uploads
+
+    @classmethod
+    def _check_is_short(video_ID: str) -> bool:
+        url = 'https://www.youtube.com/shorts/' + video_ID
+
+        session = requests.Session()
+        response = session.head(url)
+
+        return response.status_code == 200

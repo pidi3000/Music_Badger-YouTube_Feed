@@ -82,12 +82,14 @@ class Feed_Config(Badger_Config_Section):
 
 
 class YT_Config(Badger_Config_Section):
+    _exclude_vars_ = ["_check_video_type_"]
     use_api: bool
     YT_API_KEY: str
     YT_CLIENT_SECRET_PATH: Path
 
     methode_update_upload: str   # valid value "WEB", "API"
     methode_check_video_type: str     # valid value "WEB", "API", "NONE"
+    _check_video_type_: bool
 
     def setup(self):
         self.use_api = True
@@ -96,6 +98,7 @@ class YT_Config(Badger_Config_Section):
 
         self.methode_update_upload = "WEB"
         self.methode_check_video_type = "WEB"
+        self._check_video_type_ = True
 
     def post_process(self):
         self.YT_CLIENT_SECRET_PATH = self.make_absolute_to_root(
@@ -103,10 +106,16 @@ class YT_Config(Badger_Config_Section):
             enforce_in_root=True
         )
 
+        self._check_video_type_ = self.methode_check_video_type in [
+            "WEB", "API"]
+
     def pre_process(self):
         self.YT_CLIENT_SECRET_PATH = self.make_relative_to_root(
             absolute_path=self.YT_CLIENT_SECRET_PATH
         )
+
+        self._check_video_type_ = self.methode_check_video_type in [
+            "WEB", "API"]
 
 
 class Config(Badger_Config_Base):

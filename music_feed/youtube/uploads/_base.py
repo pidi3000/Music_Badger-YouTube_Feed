@@ -49,9 +49,19 @@ class YT_Uploads_Handler_Base():
         raise NotImplementedError("Derived class must implement this function")
 
     @classmethod
-    def _check_video_is_short(cls, upload_Data_Raw: dict, upload_id: int) -> bool:
-        raise NotImplementedError("Derived class must implement this function")
+    def check_videos_type(cls, uploads: list[Upload]) -> list[Upload]:
+        """Check each upload for the type of video it is
+        , either "normal" video, short or livestream
 
-    @classmethod
-    def _check_video_is_livestream(cls, upload_Data_Raw: dict, upload_id: int) -> bool:
+        Parameters
+        ----------
+        uploads : list[Upload]
+            list of uploads to check
+
+        Returns
+        -------
+        list[Upload]
+            uploads list with video type set
+
+        """
         raise NotImplementedError("Derived class must implement this function")
