@@ -5,7 +5,7 @@ from music_feed.db_models import Upload, Channel
 class YT_Uploads_Handler_Base():
 
     @classmethod
-    def update_channel(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
+    def get_channel_uploads(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
         """Upadete single channels uplaods
 
         Parameters

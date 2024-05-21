@@ -18,7 +18,7 @@ YT_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
 
     @classmethod
-    def update_channel(cls, channel: Channel) -> tuple[list[Upload], dict]:
+    def get_channel_uploads(cls, channel: Channel) -> tuple[list[Upload], dict]:
         channel_Uploads = []
 
         session = requests.Session()

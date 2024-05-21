@@ -22,7 +22,7 @@ from music_feed.youtube.uploads._base import YT_Uploads_Handler_Base
 class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
     @classmethod
-    def update_channel(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
+    def get_channel_uploads(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
         print(f"Start channel: {channel.name}")
 
         YT_API_KEY = app_config.yt_feed.YT_API_KEY
