@@ -22,6 +22,7 @@ class Upload(db.Model, _Base_Mixin):
     dateTime = db.Column(db.DateTime, nullable=False)
 
     is_short = db.Column(db.Boolean, nullable=True)
+    is_livestream = db.Column(db.Boolean, nullable=True)
 
     def __repr__(self):
         return f'<Upload {self.title} {self.yt_id}>'
@@ -33,7 +34,17 @@ class Upload(db.Model, _Base_Mixin):
     # https://stackoverflow.com/questions/35814211/how-to-add-a-custom-function-method-in-sqlalchemy-model-to-do-crud-operations
 
     @classmethod
-    def create(cls, yt_id, channel_id, title, thumbnail_url, dateTime, is_short: bool = None, add_to_session: bool = None, check_exists: bool = True):
+    def create(cls,
+               yt_id: str,
+               channel_id: int,
+               title: str,
+               thumbnail_url: str,
+               dateTime: DateTime,
+               is_short: bool = None,
+               is_livestream: bool = None,
+               add_to_session: bool = None,
+               check_exists: bool = True):
+
         if check_exists and cls.is_duplicate(yt_id):
             return "Warning: Upload already in DB: {}".format(title)
 
@@ -43,7 +54,8 @@ class Upload(db.Model, _Base_Mixin):
             title=title,
             thumbnail_url=thumbnail_url,
             dateTime=dateTime,
-            is_short=is_short
+            is_short=is_short,
+            is_livestream=is_livestream
         )
 
         if add_to_session:
@@ -111,6 +123,7 @@ class Upload(db.Model, _Base_Mixin):
             "tags": upload_tags,
             "channel": self.channel.toDict(),
             "is_short": self.is_short,
+            "is_livestream": self.is_livestream,
 
             "dateTime": self.dateTime,
             "time_relativ": self.time_relativ,
