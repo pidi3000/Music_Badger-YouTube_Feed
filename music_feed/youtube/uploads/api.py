@@ -138,11 +138,15 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
         uploads_dict = {upload.yt_id: upload for upload in uploads}
 
         for video in video_data.items:
-            video.id
+            # Shorts
             is_short = cls._check_is_short(video)
-
             if video.id in uploads_dict:
                 uploads_dict[video.id].is_short = is_short
+
+            # Livestream
+            is_livestream = cls._check_is_livestream(video)
+            if video.id in uploads_dict:
+                uploads_dict[video.id].is_livestream = is_livestream
 
         return uploads
 
@@ -152,3 +156,7 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
         # shorts should be max 60s, but I've seen 61s (probably rounding error, idk.)
         return video_duration < 70
+
+    @classmethod
+    def _check_is_livestream(cls, video: Video) -> bool:
+        return video.liveStreamingDetails is not None

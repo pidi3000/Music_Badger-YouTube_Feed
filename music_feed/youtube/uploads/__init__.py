@@ -168,14 +168,21 @@ def _print_debug_info(num_channels, new_uploads: list[Upload], start_all, end_lo
         print(" | ".join(f"{item:{width}}" for item,
               width in zip(row, max_widths)))
 
+    type_counts = [0,0,0]
+    for upload in new_uploads:
+        if upload.is_short:
+            type_counts[1] += 1
+        elif upload.is_livestream:
+            type_counts[2] += 1
+        else:
+            type_counts[0] += 1
+            
     print()
     print(f"Loaded {len(new_uploads)} new uploads")
-    print(
-        f"Normal \t : {len([upload for upload in new_uploads if not upload.is_short])}")
-    # print(f"Normal \t : {len([upload for upload in new_uploads if not upload.is_short and not upload.is_livestream])}")
-    print(
-        f"Shorts \t : {len([upload for upload in new_uploads if upload.is_short])}")
-    # print(f"Live   \t : {len([upload for upload in new_uploads if upload.is_livestream])}")
+    # print(f"Normal \t : {len([upload for upload in new_uploads if not upload.is_short])}")
+    print(f"Normal \t : {type_counts[0]}")
+    print(f"Shorts \t : {type_counts[1]}")
+    print(f"Live   \t : {type_counts[2]}")
     print()
 
 
