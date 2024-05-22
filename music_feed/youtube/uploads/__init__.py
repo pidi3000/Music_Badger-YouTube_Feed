@@ -15,27 +15,34 @@ from music_feed.youtube.uploads.api import YT_Uploads_Handler_API
 ####################################################################################################
 
 
-def update_channel(channel: Channel):
+def update_channel(channel: Channel) -> list[Upload]:
     # print(f"Start channel: {channel.name}")
 
-    uploads_handler: YT_Uploads_Handler_Base = YT_Uploads_Handler_WEB
+    try:
+        uploads_handler: YT_Uploads_Handler_Base = YT_Uploads_Handler_WEB
 
-    update_methode = app_config.yt_config.methode_update_upload
-    if update_methode == "API":
-        uploads_handler = YT_Uploads_Handler_API
+        update_methode = app_config.yt_config.methode_update_upload
+        if update_methode == "API":
+            uploads_handler = YT_Uploads_Handler_API
 
-    elif update_methode != "WEB":
-        print(
-            f"config 'yt_config.methode_update_upload' has invalid value '{update_methode}'")
+        elif update_methode != "WEB":
+            print(
+                f"config 'yt_config.methode_update_upload' has invalid value '{update_methode}'")
 
-    channel_Uploads, errors = uploads_handler.get_channel_uploads(
-        channel=channel)
+        channel_Uploads, errors = uploads_handler.get_channel_uploads(
+            channel=channel)
 
-    # TODO
-    # if errors
-    #     fail-over to different handler
+        # TODO
+        # if errors
+        #     fail-over to different handler
 
-    # print(f"done channel: {channel.name}")
+        # print(f"done channel: {channel.name}")
+
+    except Exception as e:
+        print(e)
+        print(channel.name, channel.yt_id, channel.upload_pl_ID)
+
+        channel_Uploads = []
 
     return channel_Uploads
 
@@ -46,8 +53,8 @@ def check_video_type(uploads: list[Upload]):
     uploads_handler: YT_Uploads_Handler_Base = YT_Uploads_Handler_WEB
 
     if update_methode == "API":
-        # uploads_handler = YT_Uploads_Handler_API
-        uploads_handler = None
+        uploads_handler = YT_Uploads_Handler_API
+        # uploads_handler = None
 
     elif update_methode != "WEB":
         print(
@@ -70,7 +77,7 @@ async def _update_channel(channel: Channel, executor):
 
 
 async def _load_channel_uploads() -> tuple[list[Upload], int]:
-    channels = Channel.get_all()#[:300]
+    channels = Channel.get_all()  # [:300]
 
     with ThreadPoolExecutor() as executor:
         tasks = [
@@ -163,10 +170,12 @@ def _print_debug_info(num_channels, new_uploads: list[Upload], start_all, end_lo
 
     print()
     print(f"Loaded {len(new_uploads)} new uploads")
-    print(f"Normal \t -{len([upload for upload in new_uploads if not upload.is_short])}")
-    # print(f"Normal \t -{len([upload for upload in new_uploads if not upload.is_short and not upload.is_livestream])}")
-    print(f"Shorts \t -{len([upload for upload in new_uploads if upload.is_short])}")
-    # print(f"Live   \t -{len([upload for upload in new_uploads if upload.is_livestream])}")
+    print(
+        f"Normal \t : {len([upload for upload in new_uploads if not upload.is_short])}")
+    # print(f"Normal \t : {len([upload for upload in new_uploads if not upload.is_short and not upload.is_livestream])}")
+    print(
+        f"Shorts \t : {len([upload for upload in new_uploads if upload.is_short])}")
+    # print(f"Live   \t : {len([upload for upload in new_uploads if upload.is_livestream])}")
     print()
 
 

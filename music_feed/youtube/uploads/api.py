@@ -8,8 +8,10 @@ from datetime import datetime
 
 from pyyoutube import Client
 from pyyoutube.models import (
-    PlaylistItemListResponse,
+    Video,
+    VideoListResponse,
     PlaylistItem,
+    PlaylistItemListResponse,
     PlaylistItemSnippet,
     PlaylistItemContentDetails
 )
@@ -22,14 +24,22 @@ from music_feed.youtube.uploads._base import YT_Uploads_Handler_Base
 class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
     @classmethod
-    def get_channel_uploads(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
-        print(f"Start channel: {channel.name}")
-
+    def _get_api_client(cls):
+        # TODO move client creation to the youtube/auth module
         YT_API_KEY = app_config.yt_config.YT_API_KEY
         if YT_API_KEY is None or len(YT_API_KEY.strip()) < 10:
             raise KeyError(f"YT_API_KEY mus be set to use API")
 
         cli = Client(api_key=YT_API_KEY)
+
+        return cli
+        # TODO
+
+    @classmethod
+    def get_channel_uploads(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
+        # print(f"Start channel: {channel.name}")
+
+        cli = cls._get_api_client()
 
         # cli.session = session
 
@@ -48,7 +58,7 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
         errors = None
 
-        print(f"Done channel: {channel.name} - {len(channel_Uploads)}")
+        # print(f"Done channel: {channel.name} - {len(channel_Uploads)}")
 
         return (
             channel_Uploads,
@@ -71,7 +81,7 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
                     yt_id=item.contentDetails.videoId,
                     channel_id=channel.id,
                     title=item.snippet.title,
-                    thumbnail_url=item.snippet.thumbnails.default.url,
+                    thumbnail_url=item.snippet.thumbnails.high.url,
                     dateTime=item.contentDetails.string_to_datetime(
                         item.contentDetails.videoPublishedAt),
                     add_to_session=False,
@@ -104,3 +114,41 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
         # channel_Uploads.sort(key=lambda x: x.dateTime)
 
         return channel_Uploads
+
+    @classmethod
+    def check_videos_type(cls, uploads: list[Upload]) -> list[Upload]:
+
+        if len(uploads) > 50:
+            raise ValueError(
+                f"The uploads list can not have more than 50 elements, got: {len(uploads)}")
+
+        cli = cls._get_api_client()
+
+        video_data: VideoListResponse = cli.videos.list(
+            parts=[
+                "snippet",
+                "contentDetails",
+                "liveStreamingDetails"
+            ],
+            video_id=[upload.yt_id for upload in uploads],
+            # max_results=50
+        )
+
+        # Create a lookup dictionary for uploads
+        uploads_dict = {upload.yt_id: upload for upload in uploads}
+
+        for video in video_data.items:
+            video.id
+            is_short = cls._check_is_short(video)
+
+            if video.id in uploads_dict:
+                uploads_dict[video.id].is_short = is_short
+
+        return uploads
+
+    @classmethod
+    def _check_is_short(cls, video: Video) -> bool:
+        video_duration = video.contentDetails.get_video_seconds_duration()
+
+        # shorts should be max 60s, but I've seen 61s (probably rounding error, idk.)
+        return video_duration < 70
