@@ -2,7 +2,7 @@ from . import db
 from . import _Base_Mixin
 from ..help_functions import get_relative_time, get_time_group
 
-from sqlalchemy import Column, Boolean, String, Integer,DateTime
+from sqlalchemy import Column, Boolean, String, Integer, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import expression
 
@@ -33,8 +33,8 @@ class Upload(db.Model, _Base_Mixin):
     # https://stackoverflow.com/questions/35814211/how-to-add-a-custom-function-method-in-sqlalchemy-model-to-do-crud-operations
 
     @classmethod
-    def create(cls, yt_id, channel_id, title, thumbnail_url, dateTime, is_short: bool = False, add_to_session: bool = None):
-        if Upload.query.filter_by(yt_id=yt_id).first():
+    def create(cls, yt_id, channel_id, title, thumbnail_url, dateTime, is_short: bool = None, add_to_session: bool = None, check_exists: bool = True):
+        if check_exists and cls.is_duplicate(yt_id):
             return "Warning: Upload already in DB: {}".format(title)
 
         new_upload = Upload(
@@ -51,9 +51,19 @@ class Upload(db.Model, _Base_Mixin):
 
         return new_upload
 
+    @classmethod
+    def is_duplicate(cls, yt_id):
+        if Upload.query.filter_by(yt_id=yt_id).first():
+            return True
+
+        return False
+
     ################################################################
     # Instance functions
     ################################################################
+
+    def exists(self) -> bool:
+        return self.is_duplicate(self.yt_id)
 
     # https://docs.sqlalchemy.org/en/13/orm/extensions/hybrid.html
 
