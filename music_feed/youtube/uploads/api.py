@@ -74,7 +74,8 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
                     thumbnail_url=item.snippet.thumbnails.default.url,
                     dateTime=item.contentDetails.string_to_datetime(
                         item.contentDetails.videoPublishedAt),
-                    add_to_session=False
+                    add_to_session=False,
+                    check_exists=False
                 )
 
                 # `Upload.create` can return string on duplicate

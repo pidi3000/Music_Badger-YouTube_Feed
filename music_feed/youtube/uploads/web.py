@@ -97,7 +97,8 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
                     title=videoTitle,
                     thumbnail_url=thumbnailURL,
                     dateTime=upload_dateTime,
-                    add_to_session=False
+                    add_to_session=False,
+                    check_exists=False
                 )
 
                 # `Upload.create` can return string on duplicate
@@ -132,7 +133,7 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
         return uploads
 
     @classmethod
-    def _check_is_short(video_ID: str) -> bool:
+    def _check_is_short(cls, video_ID: str) -> bool:
         url = 'https://www.youtube.com/shorts/' + video_ID
 
         session = requests.Session()
