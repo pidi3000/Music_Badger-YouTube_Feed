@@ -137,6 +137,10 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
         url = 'https://www.youtube.com/shorts/' + video_ID
 
         session = requests.Session()
+        # session.max_redirects = 0
         response = session.head(url)
 
-        return response.status_code == 200
+        response.raise_for_status()
+
+        return not response.is_redirect
+        # return response.status_code.real == 200
