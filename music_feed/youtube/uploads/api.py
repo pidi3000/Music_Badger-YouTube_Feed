@@ -147,6 +147,11 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
             is_livestream = cls._check_is_livestream(video)
             if video.id in uploads_dict:
                 uploads_dict[video.id].is_livestream = is_livestream
+                
+                # Active livestreams have a duration of 0 seconds
+                # meaning they would also get marked as a short
+                if is_livestream:
+                    uploads_dict[video.id].is_short = False 
 
         return uploads
 
