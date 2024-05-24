@@ -1,19 +1,11 @@
 
-
-import xmltodict
 import json
-
-import time
-from datetime import datetime
 
 from pyyoutube import Client
 from pyyoutube.models import (
     Video,
     VideoListResponse,
-    PlaylistItem,
     PlaylistItemListResponse,
-    PlaylistItemSnippet,
-    PlaylistItemContentDetails
 )
 
 from music_feed.config import app_config
@@ -37,11 +29,7 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
     @classmethod
     def get_channel_uploads(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
-        # print(f"Start channel: {channel.name}")
-
         cli = cls._get_api_client()
-
-        # cli.session = session
 
         channel_Uploads = []
 
@@ -58,8 +46,6 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
         errors = None
 
-        # print(f"Done channel: {channel.name} - {len(channel_Uploads)}")
-
         return (
             channel_Uploads,
             errors
@@ -67,10 +53,6 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
     @classmethod
     def _handle_uploads(cls, raw_Data: PlaylistItemListResponse, channel: Channel) -> list[Upload]:
-
-        # if channel_upload_data.items is None:
-        #     return []
-
         channel_Uploads: list[Upload] = []
 
         try:
@@ -88,7 +70,7 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
                     check_exists=False
                 )
 
-                # `Upload.create` can return string on duplicate
+                # ? `Upload.create` can return string on duplicate
                 if isinstance(upload, Upload):
                     channel_Uploads.append(upload)
 
@@ -97,7 +79,6 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
             file_path = Path(f"data_dev/uploads/{channel.name}.json")
 
             file_path.parent.mkdir(parents=True, exist_ok=True)
-            file_path.touch()
 
             with open(file_path, "a") as f:
                 f.write("\n\n")
@@ -110,8 +91,6 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
             print(f"Channel update failed: {channel.name}")
             print(e)
-
-        # channel_Uploads.sort(key=lambda x: x.dateTime)
 
         return channel_Uploads
 
@@ -130,8 +109,7 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
                 "contentDetails",
                 "liveStreamingDetails"
             ],
-            video_id=[upload.yt_id for upload in uploads],
-            # max_results=50
+            video_id=[upload.yt_id for upload in uploads]
         )
 
         # Create a lookup dictionary for uploads
@@ -147,11 +125,11 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
             is_livestream = cls._check_is_livestream(video)
             if video.id in uploads_dict:
                 uploads_dict[video.id].is_livestream = is_livestream
-                
+
                 # Active livestreams have a duration of 0 seconds
                 # meaning they would also get marked as a short
                 if is_livestream:
-                    uploads_dict[video.id].is_short = False 
+                    uploads_dict[video.id].is_short = False
 
         return uploads
 

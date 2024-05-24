@@ -1,11 +1,9 @@
 
 import requests
-from requests import Response
 
 import xmltodict
 import json
 
-import time
 from datetime import datetime
 
 from music_feed.db_models import Upload, Channel
@@ -37,7 +35,6 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
             errors = None
 
         else:
-            # errors = f"Error: {response.status} - {await response.text()}"
             errors = {}
             errors["text"] = raw_data
             errors["status"] = response.status_code
@@ -110,7 +107,6 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
             file_path = Path(f"data_dev/uploads/{channel.name}.json")
 
             file_path.parent.mkdir(parents=True, exist_ok=True)
-            # file_path.touch()
 
             with open(file_path, "a") as f:
                 f.write("\n\n")
@@ -137,10 +133,8 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
         url = 'https://www.youtube.com/shorts/' + video_ID
 
         session = requests.Session()
-        # session.max_redirects = 0
         response = session.head(url)
 
         response.raise_for_status()
 
         return not response.is_redirect
-        # return response.status_code.real == 200
