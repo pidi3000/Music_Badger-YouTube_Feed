@@ -1,6 +1,7 @@
 
 from .YouTube_auth import get_authorized_yt_obj, del_yt_credentials
 from ._uploads import update_all_async
+from music_feed.youtube import uploads
 
 # TODO rework youtube stuff
 
@@ -217,4 +218,6 @@ def get_all_subscriptions():
 ##################################################
 
 def update_Uploads():
-    return update_all_async()
+    # return update_all_async()
+    
+    return uploads.update_all_channels()

@@ -14,6 +14,9 @@ from music_feed.extension import db
 from music_feed.youtube import YouTube_auth
 from music_feed.config import app_config
 
+
+from music_feed.youtube import uploads as yt_uploads
+
 YT_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
 ##################################################
@@ -224,7 +227,8 @@ async def _update_channel(session, channel: Channel):
 
         try:
             pass
-            data = await _update_channel_api(session, channel)
+            # data = await _update_channel_api(session, channel)
+            data = await yt_uploads.update_channel_API(session, channel)
 
             # no errors
             if not (data["api_errors"] is not None and len(data["api_errors"]) > 0):
@@ -236,7 +240,8 @@ async def _update_channel(session, channel: Channel):
         # print("DEBUG API had error, using RSS")
 
     # config use_api is false or api had error
-    data = await _update_channel_rss(session, channel)
+    # data = await _update_channel_rss(session, channel)
+    data = await yt_uploads.update_channel_WEB(session, channel)
     data["api_errors"] = api_errors
 
     return data
@@ -255,6 +260,13 @@ def update_all_async():
     print("DEBUG updating uploads...")
 
     channels: list[Channel] = Channel.query.order_by(Channel.id.asc()).all()
+    
+    pl_ids = []
+    for channel in channels:
+        pl_ids.append(channel.upload_pl_ID)
+        
+    with open("data_dev/temp.json", "w") as f:
+        json.dump(pl_ids, f)
 
     start_all = time.time()
 

@@ -31,7 +31,7 @@ API_VERSION = 'v3'
 def get_client_secret_path() -> Path:
     global CLIENT_SECRETS_FILE_CACHE
     if CLIENT_SECRETS_FILE_CACHE is None:
-        CLIENT_SECRETS_FILE_CACHE = app_config.yt_feed.YT_CLIENT_SECRET_PATH
+        CLIENT_SECRETS_FILE_CACHE = app_config.yt_config.YT_CLIENT_SECRET_PATH
 
     return CLIENT_SECRETS_FILE_CACHE
 
