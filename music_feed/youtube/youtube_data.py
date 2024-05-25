@@ -1,6 +1,5 @@
 
 from .YouTube_auth import get_authorized_yt_obj, del_yt_credentials
-from ._uploads import update_all_async
 from music_feed.youtube import uploads
 
 # TODO rework youtube stuff
