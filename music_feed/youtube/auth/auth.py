@@ -53,7 +53,11 @@ def check_client_secret_exists() -> bool:
 def get_api_client() -> Client:
     YT_API_KEY = app_config.yt_config.YT_API_KEY
     if YT_API_KEY is None or len(YT_API_KEY.strip()) < 10:
-        raise KeyError(f"YT_API_KEY mus be set to use API")
+
+        if app_config.yt_config.YT_ALLOW_CLIENT_FOR_API and check_oauth_token_saved():
+            return get_oauth_client()
+        else:
+            raise KeyError(f"YT_API_KEY must be set to use API")
 
     cli = Client(api_key=YT_API_KEY)
 
@@ -81,13 +85,13 @@ def get_oauth_client() -> Client | None:
 
     if check_oauth_token_saved():
         token: AccessToken = load_oauth_token()
-        
+
         print("get client")
         print(f"\n\n\n{token.access_token=}\n{cli.refresh_token=}\n\n")
         cli.access_token = token.access_token
         cli.refresh_token = token.refresh_token
         print(f"\n\n\n{cli.access_token=}\n{cli.refresh_token=}\n\n")
-        
+
         print("DONE")
 
         return cli
@@ -146,12 +150,11 @@ def handle_authorization_response(response_uri: str):
         authorization_response=response_uri,
         state=state
     )
-    
 
     print()
     print("DEBUG oauth STATE: ", state)
     print()
-    
+
     print(f"DEBUG new token \n{access_token.to_json(indent=4)}")
 
     save_oauth_token(access_token)

@@ -84,8 +84,10 @@ class Feed_Config(Badger_Config_Section):
 class YT_Config(Badger_Config_Section):
     _exclude_vars_ = ["_check_video_type_"]
     use_api: bool
+
     YT_API_KEY: str
     YT_CLIENT_SECRET_PATH: Path
+    YT_ALLOW_CLIENT_FOR_API: bool
 
     methode_update_upload: str   # valid value "WEB", "API"
     methode_check_video_type: str     # valid value "WEB", "API", "NONE"
@@ -95,6 +97,7 @@ class YT_Config(Badger_Config_Section):
         self.use_api = True
         self.YT_API_KEY = ""
         self.YT_CLIENT_SECRET_PATH = Path("client_secret_youtube.json")
+        self.YT_ALLOW_CLIENT_FOR_API = True
 
         self.methode_update_upload = "WEB"
         self.methode_check_video_type = "WEB"
