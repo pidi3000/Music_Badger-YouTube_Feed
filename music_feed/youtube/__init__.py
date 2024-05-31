@@ -18,5 +18,6 @@ os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 
 
 def init(app: Flask):
+    from music_feed.youtube.auth import routes
     print("init youtube")
     app.register_blueprint(blueprint)

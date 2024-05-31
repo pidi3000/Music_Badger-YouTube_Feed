@@ -35,6 +35,14 @@ input:hover{
     /* border: 5px solid red; */
 }
 
+.profile-picture-box img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto; /* Ensures the aspect ratio is maintained */
+    height: auto; /* Ensures the aspect ratio is maintained */
+    display: block; /* Ensures there are no extra spaces around the image */
+}
+
 .tag-list{
     height: 120px;
 }

@@ -10,7 +10,7 @@ from pyyoutube.models import (
 
 from music_feed.config import app_config
 from music_feed.db_models import Upload, Channel
-from music_feed.youtube.uploads._base import YT_Uploads_Handler_Base
+from music_feed.youtube.data.uploads._base import YT_Uploads_Handler_Base
 
 
 class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):

@@ -4,7 +4,7 @@ import re
 from ..extension import db
 from ..db_models import Tag, Channel
 
-from ..youtube import youtube_data as yt_data
+from music_feed.youtube import data as YT_data
 from music_feed.config import app_config
 
 
@@ -37,7 +37,7 @@ def handle_form(channel, form, tags_old):
 
         channel = Channel()
 
-    channel_data = yt_data.get_channel_data(yt_id)
+    channel_data = YT_data.get_channel_data(yt_id)
     # check channel data found / channel ID is valid
     if "error" in channel_data:
         # print(channel_data["error"])
@@ -179,7 +179,7 @@ def extract_channel_id(channel_string):
 
             if pattern == patterns[0]:  # matched the video URL pattern
                 pass
-                # yt_id = yt_data.get_channel_ID_from_video(video_id=yt_id)
+                # yt_id = YT_data.get_channel_ID_from_video(video_id=yt_id)
 
             break
 
@@ -238,7 +238,7 @@ def extract_channel_id_v2(channel_string_raw: str):
         channel_string = channel_string.split("v=", 1)[1]
         video_id = channel_string.split("&", 1)[0]
 
-        yt_id = yt_data.get_channel_ID_from_video(video_id=video_id)
+        yt_id = YT_data.get_channel_ID_from_video(video_id=video_id)
 
     # From Handle URL
     else:
@@ -249,7 +249,7 @@ def extract_channel_id_v2(channel_string_raw: str):
             print("From channel handle")
             channel_handle = channel_string
 
-            yt_id = yt_data.get_channel_ID_from_handle(handle=channel_handle)
+            yt_id = YT_data.get_channel_ID_from_handle(handle=channel_handle)
 
     print(f"{channel_string_raw=}")
     print(f"{channel_string=}")
@@ -273,7 +273,7 @@ def handle_import_channel(request):  # TODO add error handling
     print(import_source)
 
     if import_source == "youtube":
-        all_subs = yt_data.get_all_subscriptions()
+        all_subs = YT_data.get_all_subscriptions()
 
         print()
         print(len(all_subs))

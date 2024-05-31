@@ -7,9 +7,9 @@ from concurrent.futures import ThreadPoolExecutor
 from music_feed.extension import db
 from music_feed.config import app_config
 from music_feed.db_models import Upload, Channel
-from music_feed.youtube.uploads._base import YT_Uploads_Handler_Base
-from music_feed.youtube.uploads.web import YT_Uploads_Handler_WEB
-from music_feed.youtube.uploads.api import YT_Uploads_Handler_API
+from music_feed.youtube.data.uploads._base import YT_Uploads_Handler_Base
+from music_feed.youtube.data.uploads.web import YT_Uploads_Handler_WEB
+from music_feed.youtube.data.uploads.api import YT_Uploads_Handler_API
 
 ####################################################################################################
 ####################################################################################################

@@ -9,7 +9,8 @@ from flask import render_template, request, url_for, redirect, jsonify
 
 
 from . import blueprint as channel_pages
-from music_feed.youtube import youtube_data
+from music_feed.youtube import auth as YT_Auth
+from music_feed.youtube import data as YT_data
 
 
 @channel_pages.route('/')
@@ -33,7 +34,8 @@ def channel(channel_id):
 
 @channel_pages.route('/create/', methods=('GET', 'POST'))
 def create():
-    if 'credentials_MAIN' not in flask.session:     # TODO
+    if not YT_Auth.check_oauth_client_works():
+        print("DEBUG oauth not authenticated")
         return flask.redirect(flask.url_for('youtube_auth.authorize'))
 
     if request.method == 'POST':
@@ -51,9 +53,14 @@ def create():
 # @channel_pages.route('/import/<string:source>', methods=('GET', 'POST', ))
 @channel_pages.route('/import/', methods=('GET', 'POST', ))
 def import_channel():
-    if 'credentials_MAIN' not in flask.session:
+    # if 'credentials_MAIN' not in flask.session:
+    #     return flask.redirect(flask.url_for('youtube_auth.authorize'))
+
+    if not YT_Auth.check_oauth_client_works():
+        print("DEBUG oauth not authenticated")
         return flask.redirect(flask.url_for('youtube_auth.authorize'))
 
+    print("DEBUG oauth authenticated")
     if request.method == 'POST':
         _channel_helper.handle_import_channel(request)
 
@@ -100,7 +107,7 @@ def refresh_pfp(channel_id):
     channel = Channel.query.get_or_404(channel_id)
     channel: Channel
 
-    pfp_url, redirect_res = youtube_data.get_channel_pfp_url(
+    pfp_url, redirect_res = YT_data.get_channel_pfp_url(
         yt_channel_id=channel.yt_id)
 
     if redirect_res is not None:
