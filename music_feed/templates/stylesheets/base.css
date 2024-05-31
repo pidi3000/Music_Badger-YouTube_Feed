@@ -18,6 +18,17 @@ form {
     margin: 5px;
 }
 
+.navbar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background-color: rgb(70, 70, 70);
+    /* color: white;  */
+    padding: 10px 0;
+    /* text-align: center; */
+    z-index: 1000; /* Ensures the navbar is on top of other content */
+}
+
 .content {
     background-color: rgb(70, 70, 70);
     margin: 5px;

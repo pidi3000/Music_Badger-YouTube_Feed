@@ -11,14 +11,16 @@
 </head>
 
 <body class="body-style" >
-    <nav>
-        <a href="{{ url_for('index') }}">FlaskApp</a>
-        <a href="{{ url_for('tag.index') }}">Tag</a>
-        <!-- <a href="{{ url_for('channel.index') }}">Channel</a> -->
-        <a href="{{ url_for('channel.index') }}">Channel</a>
-    </nav>
-    <hr>
-    {% block navbar %} {% endblock %}
+    <div class="navbar">
+        <nav>
+            <a href="{{ url_for('index') }}">FlaskApp</a>
+            <a href="{{ url_for('tag.index') }}">Tag</a>
+            <!-- <a href="{{ url_for('channel.index') }}">Channel</a> -->
+            <a href="{{ url_for('channel.index') }}">Channel</a>
+        </nav>
+        <hr>
+        {% block navbar %} {% endblock %}
+    </div>
     <div class="content">
         {% block content %} {% endblock %}
     </div>
