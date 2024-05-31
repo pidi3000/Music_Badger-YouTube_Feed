@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 
 from music_feed.db_models import Upload, Channel
-from music_feed.youtube.uploads._base import YT_Uploads_Handler_Base
+from music_feed.youtube.data.uploads._base import YT_Uploads_Handler_Base
 
 
 YT_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
