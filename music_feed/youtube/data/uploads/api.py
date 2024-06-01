@@ -1,7 +1,7 @@
 
 import json
 
-from pyyoutube import Client
+import pyyoutube
 from pyyoutube.models import (
     Video,
     VideoListResponse,
@@ -11,29 +11,20 @@ from pyyoutube.models import (
 from music_feed.config import app_config
 from music_feed.db_models import Upload, Channel
 from music_feed.youtube.data.uploads._base import YT_Uploads_Handler_Base
+from music_feed.youtube import auth as YT_auth
 
 
 class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
     @classmethod
-    def _get_api_client(cls):
-        # TODO move client creation to the youtube/auth module
-        YT_API_KEY = app_config.yt_config.YT_API_KEY
-        if YT_API_KEY is None or len(YT_API_KEY.strip()) < 10:
-            raise KeyError(f"YT_API_KEY mus be set to use API")
+    def get_channel_uploads(cls, channel: Channel, yt_client: pyyoutube.Client = None) -> tuple[list[Upload], dict | None]:
 
-        cli = Client(api_key=YT_API_KEY)
-
-        return cli
-        # TODO
-
-    @classmethod
-    def get_channel_uploads(cls, channel: Channel) -> tuple[list[Upload], dict | None]:
-        cli = cls._get_api_client()
+        if yt_client is None:
+            yt_client = YT_auth.get_api_client()
 
         channel_Uploads = []
 
-        raw_data = cli.playlistItems.list(
+        raw_data = yt_client.playlistItems.list(
             playlist_id=channel.upload_pl_ID,
             parts="snippet, contentDetails",
             max_results=50,
@@ -95,15 +86,16 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
         return channel_Uploads
 
     @classmethod
-    def check_videos_type(cls, uploads: list[Upload]) -> list[Upload]:
+    def check_videos_type(cls, uploads: list[Upload], yt_client: pyyoutube.Client = None) -> list[Upload]:
 
         if len(uploads) > 50:
             raise ValueError(
                 f"The uploads list can not have more than 50 elements, got: {len(uploads)}")
 
-        cli = cls._get_api_client()
+        if yt_client is None:
+            yt_client = YT_auth.get_api_client()
 
-        video_data: VideoListResponse = cli.videos.list(
+        video_data: VideoListResponse = yt_client.videos.list(
             parts=[
                 "snippet",
                 "contentDetails",
@@ -142,4 +134,5 @@ class YT_Uploads_Handler_API(YT_Uploads_Handler_Base):
 
     @classmethod
     def _check_is_livestream(cls, video: Video) -> bool:
+        # TODO try differentiating between livestream and "live video premier"
         return video.liveStreamingDetails is not None

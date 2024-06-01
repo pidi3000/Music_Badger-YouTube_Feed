@@ -4,9 +4,12 @@ import time
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
+import pyyoutube
+
 from music_feed.extension import db
 from music_feed.config import app_config
 from music_feed.db_models import Upload, Channel
+from music_feed.youtube import auth as YT_auth
 from music_feed.youtube.data.uploads._base import YT_Uploads_Handler_Base
 from music_feed.youtube.data.uploads.web import YT_Uploads_Handler_WEB
 from music_feed.youtube.data.uploads.api import YT_Uploads_Handler_API
@@ -15,7 +18,7 @@ from music_feed.youtube.data.uploads.api import YT_Uploads_Handler_API
 ####################################################################################################
 
 
-def update_channel(channel: Channel) -> list[Upload]:
+def update_channel(channel: Channel, yt_client: pyyoutube.Client = None) -> list[Upload]:
     # print(f"Start channel: {channel.name}")
 
     try:
@@ -30,7 +33,9 @@ def update_channel(channel: Channel) -> list[Upload]:
                 f"config 'yt_config.methode_update_upload' has invalid value '{update_methode}'")
 
         channel_Uploads, errors = uploads_handler.get_channel_uploads(
-            channel=channel)
+            channel=channel,
+            yt_client=yt_client
+        )
 
         # TODO
         # if errors
@@ -47,7 +52,7 @@ def update_channel(channel: Channel) -> list[Upload]:
     return channel_Uploads
 
 
-def check_video_type(uploads: list[Upload]):
+def check_video_type(uploads: list[Upload], yt_client: pyyoutube.Client = None):
     update_methode = app_config.yt_config.methode_check_video_type
 
     uploads_handler: YT_Uploads_Handler_Base = YT_Uploads_Handler_WEB
@@ -61,7 +66,9 @@ def check_video_type(uploads: list[Upload]):
             f"config 'yt_config.methode_check_video_type' has invalid value '{update_methode}'")
 
     channel_Uploads = uploads_handler.check_videos_type(
-        uploads=uploads)
+        uploads=uploads,
+        yt_client=yt_client
+    )
 
     return channel_Uploads
 
@@ -69,19 +76,19 @@ def check_video_type(uploads: list[Upload]):
 ####################################################################################################
 
 
-async def _update_channel(channel: Channel, executor):
+async def _update_channel(channel: Channel, executor, yt_client: pyyoutube.Client = None):
     loop = asyncio.get_event_loop()
-    channel_uploads = await loop.run_in_executor(executor, update_channel, channel)
+    channel_uploads = await loop.run_in_executor(executor, update_channel, channel, yt_client)
 
     return channel_uploads
 
 
-async def _load_channel_uploads() -> tuple[list[Upload], int]:
+async def _load_channel_uploads(yt_client: pyyoutube.Client = None) -> tuple[list[Upload], int]:
     channels = Channel.get_all()  # [:300]
 
     with ThreadPoolExecutor() as executor:
         tasks = [
-            _update_channel(channel, executor) for channel in channels
+            _update_channel(channel, executor, yt_client=yt_client) for channel in channels
         ]
 
         new_uploads: list[list[Upload]] = await asyncio.gather(*tasks)
@@ -101,14 +108,14 @@ async def _load_channel_uploads() -> tuple[list[Upload], int]:
 ####################################################################################################
 
 
-async def _check_video_type_groups(upload_group: list[Upload], executor):
+async def _check_video_type_groups(upload_group: list[Upload], executor, yt_client: pyyoutube.Client = None):
     loop = asyncio.get_event_loop()
-    uploads = await loop.run_in_executor(executor, check_video_type, upload_group)
+    uploads = await loop.run_in_executor(executor, check_video_type, upload_group, yt_client)
 
     return uploads
 
 
-async def _check_video_type(uploads: list[Upload]):
+async def _check_video_type(uploads: list[Upload], yt_client: pyyoutube.Client = None):
     check_methode = app_config.yt_config.methode_check_video_type
     max_group_size = 50 if check_methode == "API" else 10
 
@@ -117,7 +124,7 @@ async def _check_video_type(uploads: list[Upload]):
 
     with ThreadPoolExecutor() as executor:
         tasks = [
-            _check_video_type_groups(upload_group, executor) for upload_group in uploads_groups
+            _check_video_type_groups(upload_group, executor, yt_client=yt_client) for upload_group in uploads_groups
         ]
 
         new_uploads: list[list[Upload]] = await asyncio.gather(*tasks)
@@ -168,7 +175,7 @@ def _print_debug_info(num_channels, new_uploads: list[Upload], start_all, end_lo
         print(" | ".join(f"{item:{width}}" for item,
               width in zip(row, max_widths)))
 
-    type_counts = [0,0,0]
+    type_counts = [0, 0, 0]
     for upload in new_uploads:
         if upload.is_short:
             type_counts[1] += 1
@@ -176,7 +183,7 @@ def _print_debug_info(num_channels, new_uploads: list[Upload], start_all, end_lo
             type_counts[2] += 1
         else:
             type_counts[0] += 1
-            
+
     print()
     print(f"Loaded {len(new_uploads)} new uploads")
     # print(f"Normal \t : {len([upload for upload in new_uploads if not upload.is_short])}")
@@ -190,15 +197,18 @@ def update_all_channels():
     print()
     print("DEBUG updating uploads...")
 
+    yt_client = YT_auth.get_api_client()
+
     start_all = time.time()
 
-    new_uploads, num_channels = asyncio.run(_load_channel_uploads())
+    new_uploads, num_channels = asyncio.run(
+        _load_channel_uploads(yt_client=yt_client))
 
     end_load = time.time()
 
     if app_config.yt_config._check_video_type_:
         # new_uploads = asyncio.run(_check_video_type(new_uploads))
-        asyncio.run(_check_video_type(new_uploads))
+        asyncio.run(_check_video_type(new_uploads, yt_client=yt_client))
 
     end_all = time.time()
 
