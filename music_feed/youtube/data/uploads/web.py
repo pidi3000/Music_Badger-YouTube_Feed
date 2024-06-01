@@ -16,7 +16,7 @@ YT_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
 
     @classmethod
-    def get_channel_uploads(cls, channel: Channel) -> tuple[list[Upload], dict]:
+    def get_channel_uploads(cls, channel: Channel, yt_client=None) -> tuple[list[Upload], dict]:
         channel_Uploads = []
 
         session = requests.Session()
@@ -120,7 +120,7 @@ class YT_Uploads_Handler_WEB(YT_Uploads_Handler_Base):
         return channel_Uploads
 
     @classmethod
-    def check_videos_type(cls, uploads: list[Upload]) -> list[Upload]:
+    def check_videos_type(cls, uploads: list[Upload], yt_client=None) -> list[Upload]:
 
         for upload in uploads:
             is_short = cls._check_is_short(upload.yt_id)
