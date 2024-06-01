@@ -53,6 +53,15 @@ function add_uploads(uploads_data) {
         image.src = upload["thumbnail_url"]
 
 
+        if (upload["is_short"] == true) {
+            clone.getElementById("short-icon").style.display = "block";
+        }
+
+        if (upload["is_livestream"] == true) {
+            clone.getElementById("live-icon").style.display = "block";
+        }
+
+
         /////////////////////////////////////////////////////////////////////////////
         var title_div = clone.getElementById("title")
         title_div.innerHTML = upload["title"]
