@@ -119,7 +119,8 @@ def get_authorization_url(redirect_uri: str = None) -> str:
 
     authorize_url, state = client.get_authorize_url(
         # access_type=`online` or `offline`
-        access_type="offline"
+        access_type="offline",
+        prompt="consent"
     )
 
     flask.session[SESSION_NAME_YT_OAUTH_STATE] = state
