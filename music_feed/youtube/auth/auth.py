@@ -34,7 +34,7 @@ SESSION_NAME_YT_OAUTH_STATE = "yt_oauth_state"
 YT_OAUTH_SCOPES = ['https://www.googleapis.com/auth/youtube.readonly']
 
 logger = logging.getLogger(__name__)
-print(__name__)
+# print(__name__)
 
 
 def get_client_secret_path() -> Path:
@@ -185,7 +185,6 @@ def revoke_access_token() -> bool:
         try:
             status = client.revoke_access_token(token=token.access_token)
         except PyYouTubeException as e:
-            print(e)
             logger.exception("Token revoke error")
             status = False
 
@@ -244,8 +243,6 @@ def save_oauth_token(yt_oauth_token: AccessToken) -> bool:
 
 def load_oauth_token() -> AccessToken | None:
     token_string = flask.session.get(SESSION_NAME_YT_OAUTH_TOKEN, None)
-
-    # print(f"DEBUG: load token: \n{token_string}")
 
     if token_string is None:
         return None
