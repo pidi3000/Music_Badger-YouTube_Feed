@@ -1,6 +1,7 @@
 
 
 import flask
+import logging
 from datetime import datetime
 
 from pathlib import Path
@@ -37,6 +38,9 @@ SESSION_NAME_YT_CHANNEL_ID = "yt_channel_id"
 SESSION_NAME_YT_OAUTH_STATE = "yt_oauth_state"
 YT_OAUTH_SCOPES = ['https://www.googleapis.com/auth/youtube.readonly']
 
+logger = logging.getLogger(__name__)
+# print(__name__)
+
 
 def get_client_secret_path() -> Path:
     return app_config.yt_config.YT_CLIENT_SECRET_PATH
@@ -63,7 +67,9 @@ def get_api_client() -> Client:
         if app_config.yt_config.YT_ALLOW_CLIENT_FOR_API and check_oauth_token_saved():
             return get_oauth_client()
         else:
-            raise KeyError(f"YT_API_KEY must be set to use API")
+            error_msg = f"YT_API_KEY must be set to use API"
+            logger.error(error_msg)
+            raise KeyError(error_msg)
 
     cli = Client(api_key=YT_API_KEY)
 
@@ -91,20 +97,31 @@ def _get_default_oauth_client(token: AccessToken = None) -> Client:
 def get_oauth_client() -> Client | None:
     cli = _get_default_oauth_client()
 
-    print("DEBUG get oauth client")
+    temp_logger = logger.getChild("get_oauth_client")
+    # temp_logger.debug("get oauth client")
 
     if check_oauth_token_saved():
         token: AccessToken = load_oauth_token()
 
-        print("get client")
-        print(f"\n\n\n{token.access_token=}\n{cli.refresh_token=}\n\n")
+        temp_logger.debug("get client")
+        temp_logger.debug(
+            f"\n\n\n{token.access_token=}",
+            f"\n{cli.refresh_token=}\n\n"
+        )
+
         cli.access_token = token.access_token
         cli.refresh_token = token.refresh_token
-        print(f"\n\n\n{cli.access_token=}\n{cli.refresh_token=}\n\n")
 
-        print("DONE")
+        temp_logger.debug(
+            f"\n\n\n{token.access_token=}",
+            f"\n{cli.refresh_token=}\n\n"
+        )
+
+        temp_logger.debug("DONE")
 
         return cli
+
+    temp_logger.debug("No outh tokens")
 
     # TODO maybe raise error
     return None
@@ -124,6 +141,7 @@ def get_authorization_url(needs_consent: bool = False) -> str:
     Returns
         url: Authorize url for user.
     """
+    temp_logger = logger.getChild("oauth_flow")
 
     client = _get_default_oauth_client()
 
@@ -135,9 +153,7 @@ def get_authorization_url(needs_consent: bool = False) -> str:
 
     flask.session[SESSION_NAME_YT_OAUTH_STATE] = state
 
-    print()
-    print("DEBUG oauth STATE: ", state)
-    print()
+    temp_logger.debug(f"STATE: {state}")
 
     return authorize_url
 
@@ -156,6 +172,7 @@ def handle_authorization_response(response_uri: str) -> flask.Response | None:
     flask.Response | None
         target where the application should redirect the user
     """
+    temp_logger = logger.getChild("oauth_flow")
 
     client = _get_default_oauth_client()
 
@@ -166,11 +183,8 @@ def handle_authorization_response(response_uri: str) -> flask.Response | None:
         state=state
     )
 
-    print()
-    print("DEBUG oauth STATE: ", state)
-    print()
-
-    print(f"DEBUG new token \n{new_access_token.to_json(indent=4)}")
+    temp_logger.debug(f"STATE: {state}")
+    temp_logger.debug(f"new token: \n{new_access_token.to_json(indent=4)}")
 
     # ?if new token has `refresh token`
     #   save new token, delete old
@@ -198,7 +212,7 @@ def handle_authorization_response(response_uri: str) -> flask.Response | None:
 
         if isinstance(old_token, AccessToken):
             # ! refresh old token, has to save cookie
-            print("DEBUG: refresh old token")
+            temp_logger.debug("refresh old token")
 
             refresh_oauth_token(
                 token=old_token
@@ -206,7 +220,7 @@ def handle_authorization_response(response_uri: str) -> flask.Response | None:
 
         else:
             # ! redirect to oauth flow start with `prompt="consent"`
-            print("DEBUG: redirect to oauth flow start with `prompt='consent'`")
+            temp_logger.debug("redirect to oauth flow start with `prompt='consent'`")
 
             return flask.redirect(flask.url_for(".authorize", needs_consent=True))
 
@@ -219,17 +233,12 @@ def revoke_access_token() -> bool:
         client = _get_default_oauth_client()
         token = load_oauth_token()
 
-        print()
-        print("DEBUG OAuth token: ", token, type(token))
-        print("DEBUG OAuth token: ", token.access_token,
-              type(token.access_token))
-        print()
-        print()
+        logger.debug(f"Revoke OAuth token: \n{token.to_json(indent=4)}")
 
         try:
             status = client.revoke_access_token(token=token.access_token)
         except PyYouTubeException as e:
-            print(e)
+            logger.exception("Token revoke error")
             status = False
 
         delete_oauth_token()
@@ -239,7 +248,7 @@ def revoke_access_token() -> bool:
 
 
 def refresh_oauth_token(token: AccessToken = None, yt_id: str = None):
-    print("DEBUG refresh token")
+    logger.debug("refresh token")
 
     if token is None:
         token = load_oauth_token(yt_id=yt_id)
@@ -253,7 +262,7 @@ def refresh_oauth_token(token: AccessToken = None, yt_id: str = None):
     client = _get_default_oauth_client()
 
     try:
-        print("DEBUG run refresh")
+        logger.debug("run refresh")
         new_token = client.refresh_access_token(
             refresh_token=token.refresh_token
         )
@@ -268,7 +277,7 @@ def refresh_oauth_token(token: AccessToken = None, yt_id: str = None):
         )
 
     except PyYouTubeException as e:
-        print(e)
+        logger.exception("OAUTH token refresh failed")
         raise
 
     return True
@@ -278,8 +287,6 @@ def refresh_oauth_token(token: AccessToken = None, yt_id: str = None):
 # Credential sutff NEW
 ####################################################################################################
 def check_oauth_token_saved() -> bool:
-    print("DEBUG check token saved")
-
     token = load_oauth_token()
     return isinstance(token, AccessToken)
 
@@ -292,26 +299,25 @@ def _check_oauth_token_valid() -> bool | None:
 
 
 def check_oauth_client_works(cli: Client = None) -> bool:
-    """Auto creates client of none given
+    """Auto creates client if none given
     """
 
     if cli is None:
         cli = get_oauth_client()
 
     if cli is None:
-        print("DEBUG oauth client error")
+        logger.debug(f"oauth client error")
         return False
 
-    print(f"\n\n\n{cli.access_token=}\n{cli.refresh_token=}\n\n")
+    logger.debug(f"\n{cli.access_token=}\n{cli.refresh_token=}")
     try:
         test_data = cli.subscriptions.list(
             mine=True
         )
     except PyYouTubeException as e:
-        print(f"\n\n\n{cli.access_token=}\n{cli.refresh_token=}\n\n")
+        logger.debug(f"\n{cli.access_token=}\n{cli.refresh_token=}")
+        logger.exception("OAUTH client doesn't work")
         raise
-        print(e)
-        return False
 
     return True
 
@@ -332,15 +338,12 @@ def save_oauth_token(yt_oauth_token: AccessToken, yt_id: str = None) -> bool:
 
     flask.session[SESSION_NAME_YT_CHANNEL_ID] = yt_id
 
-    print(f"DEBUG: save token: \n{yt_oauth_token.to_json(indent=4)}")
-    print(datetime.fromtimestamp(yt_oauth_token.expires_at))
+    logger.debug(f"save OAuth token: \n{yt_oauth_token.to_json(indent=4)}\n\tvalid until: {datetime.fromtimestamp(yt_oauth_token.expires_at)}")
 
 
 def load_oauth_token(yt_id: str = None) -> AccessToken | None:
     if yt_id is None:
         yt_id = flask.session.get(SESSION_NAME_YT_CHANNEL_ID, None)
-
-    # print(f"DEBUG: load token: \n{token_string}")
 
     if yt_id is None:
         return None
@@ -352,8 +355,7 @@ def load_oauth_token(yt_id: str = None) -> AccessToken | None:
 
     oauth_token = yt_oauth_token.oauth_token
 
-    print(f"\nDEBUG: load token: \n{oauth_token.to_json(indent=4)}\n\n")
-    print(datetime.fromtimestamp(oauth_token.expires_at))
+    logger.debug(f"load OAuth token: \n{oauth_token.to_json(indent=4)}\n\tvalid until: {datetime.fromtimestamp(oauth_token.expires_at)}")
 
     return oauth_token
 

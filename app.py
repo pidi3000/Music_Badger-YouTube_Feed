@@ -1,18 +1,57 @@
-APP_VERSION = "2.0.0"
+import music_feed
+import logging
+from pathlib import Path
+
 
 ####################################################################################################
+APP_VERSION = "2.0.0"
+####################################################################################################
+
+
 def create_app():
-    import music_feed
     app = music_feed.create_app()
 
     return app
 
+
+def setup_logger_output():
+
+    # Create the 'data' directory if it doesn't exist
+    log_dir = Path("data")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir.joinpath("logs.log").absolute()
+
+    # print(log_file)
+    # return
+
+    logger = logging.getLogger("music_feed")
+    # logger = logging.getLogger("music_feed.youtube.auth")
+    # logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # Create formatters
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+
+    # Create File handler
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    # Create Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
+
 def main():
     app = create_app()
+    setup_logger_output()
 
     print(app.url_map)
-
-    from pathlib import Path
 
     cert_path = Path(app.config["SSL_CERT_PATH"]).absolute()
     key_path = Path(app.config["SSL_KEY_PATH"]).absolute()
