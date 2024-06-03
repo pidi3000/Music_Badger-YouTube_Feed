@@ -16,7 +16,12 @@ def authorize():
     if not YT_Auth.check_client_secret_exists():
         return redirect(url_for('.set_client_secret'))
 
-    authorization_url = YT_Auth.get_authorization_url()
+    needs_consent = request.args.get('needs_consent', 'false', str)
+    needs_consent = needs_consent.lower() in ['true', '1', 't', 'y', 'yes']
+
+    authorization_url = YT_Auth.get_authorization_url(
+        needs_consent=needs_consent
+    )
 
     return flask.redirect(authorization_url)
 
@@ -24,10 +29,12 @@ def authorize():
 @youtube_auth_pages.route('/oauth2callback')
 def oauth2callback():
     authorization_response = flask.request.url
-    
+
     print("DEBUG oauth callback")
 
-    YT_Auth.handle_authorization_response(authorization_response)
+    redirect = YT_Auth.handle_authorization_response(authorization_response)
+    if redirect is not None:
+        return redirect
 
     # TODO redirect back to original site, before being redirected to auth flow
     return flask.redirect("/")
@@ -35,7 +42,7 @@ def oauth2callback():
 
 @youtube_auth_pages.route('/revoke')
 def revoke():
-    if not YT_Auth.check_oauth_token_saved:
+    if not YT_Auth.check_oauth_token_saved():
         return ('You need to <a href="{}">authorize</a> before ' +
                 'testing the code to revoke credentials.'.format(flask.url_for(".authorize")))
 
@@ -43,6 +50,20 @@ def revoke():
 
     if status:
         return ('Credentials successfully revoked.')
+    else:
+        return ('An error occurred.')
+
+
+@youtube_auth_pages.route('/refresh')
+def refresh():
+    if not YT_Auth.check_oauth_token_saved():
+        return ('You need to <a href="{}">authorize</a> before ' +
+                'testing the code to revoke credentials.'.format(flask.url_for(".authorize")))
+
+    status = YT_Auth.refresh_oauth_token()
+
+    if status:
+        return ('Credentials successfully refreshed.')
     else:
         return ('An error occurred.')
 
@@ -92,7 +113,7 @@ def _handle_upload_client_secret_file():
         )
         return redirect(request.url)
 
-    if file :
+    if file:
         file.save(YT_Auth.get_client_secret_path())
 
         return redirect(url_for('.authorize'))

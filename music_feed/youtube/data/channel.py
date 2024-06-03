@@ -1,6 +1,7 @@
 
 from music_feed.youtube import auth as YT_Auth
 
+import pyyoutube
 from pyyoutube import (
     ChannelListResponse,
     VideoListResponse
@@ -98,6 +99,26 @@ def get_channel_ID_from_video(video_id: str):
     return channel_id
 
 
+def get_channel_ID_mine(client: pyyoutube.Client) -> str:
+
+    channel_data: ChannelListResponse = client.channels.list(
+        parts="snippet,contentDetails",
+        mine=True
+    )
+
+    yt_id = None
+
+    try:
+        yt_id = channel_data.items[0].id
+
+    except KeyError as e:
+        print(e)
+        error_msg = f"ERROR: no youtube data found for provided access token"
+        print(error_msg)
+        
+        raise
+
+    return yt_id
 ##################################################
 def _get_channel_ID(handle: str = None, username: str = None):
     cli = YT_Auth.get_api_client()
