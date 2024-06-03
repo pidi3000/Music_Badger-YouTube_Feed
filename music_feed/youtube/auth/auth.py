@@ -212,7 +212,7 @@ def handle_authorization_response(response_uri: str) -> flask.Response | None:
 
         if isinstance(old_token, AccessToken):
             # ! refresh old token, has to save cookie
-            print("DEBUG: refresh old token")
+            temp_logger.debug("refresh old token")
 
             refresh_oauth_token(
                 token=old_token
@@ -220,7 +220,7 @@ def handle_authorization_response(response_uri: str) -> flask.Response | None:
 
         else:
             # ! redirect to oauth flow start with `prompt="consent"`
-            print("DEBUG: redirect to oauth flow start with `prompt='consent'`")
+            temp_logger.debug("redirect to oauth flow start with `prompt='consent'`")
 
             return flask.redirect(flask.url_for(".authorize", needs_consent=True))
 
@@ -248,7 +248,7 @@ def revoke_access_token() -> bool:
 
 
 def refresh_oauth_token(token: AccessToken = None, yt_id: str = None):
-    print("DEBUG refresh token")
+    logger.debug("refresh token")
 
     if token is None:
         token = load_oauth_token(yt_id=yt_id)
@@ -262,7 +262,7 @@ def refresh_oauth_token(token: AccessToken = None, yt_id: str = None):
     client = _get_default_oauth_client()
 
     try:
-        print("DEBUG run refresh")
+        logger.debug("run refresh")
         new_token = client.refresh_access_token(
             refresh_token=token.refresh_token
         )
@@ -277,7 +277,7 @@ def refresh_oauth_token(token: AccessToken = None, yt_id: str = None):
         )
 
     except PyYouTubeException as e:
-        print(e)
+        logger.exception("OAUTH token refresh failed")
         raise
 
     return True
