@@ -1,35 +1,64 @@
 from . import db
 from . import _Base_Mixin
 
+from sqlalchemy import Column, Integer, String
+
+import pyyoutube
+
 
 class YT_Credentials(_Base_Mixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    account_name = db.Column(db.String(100), unique=False, nullable=False)
-    credentials = db.Column(db.String(1000), unique=True, nullable=False)
+    __tablename__ = "yt_credentials"
+    yt_id = db.Column(db.String(100), primary_key=True)
+    yt_name = db.Column(db.String(100), unique=False, nullable=False)
+
+    # this is a `pyyoutube.AccessToken` as a json string
+    _oauth_token = db.Column(db.String(10000), unique=True, nullable=False)
+
+    # access_token: Optional[str] = field(default=None)
+    # expires_in: Optional[int] = field(default=None)
+    # refresh_token: Optional[str] = field(default=None, repr=False)
+    # scope: Optional[List[str]] = field(default=None, repr=False)
+    # token_type: Optional[str] = field(default=None)
+    # expires_at: Optional[float] = field(default=None, repr=False)
 
     def __repr__(self):
-        return f'<yt_credentials {self.account_name}>'
+        return f'<yt_credentials {self.yt_name}>'
 
     ################################################################
     # Class functions
     ################################################################
 
     @classmethod
-    def create(cls, user_id, account_name, credentials):
-        obj = super().create( user_id, account_name, credentials)
-        db.session.commit()
+    def create(cls, yt_id, yt_name, oauth_token: pyyoutube.AccessToken):
+        obj = super().create(
+            yt_id=yt_id,
+            yt_name=yt_name,
+            _oauth_token=oauth_token.to_json()
+        )
+
+        return obj
 
     @classmethod
-    def set(cls, user_id, account_name, credentials):
-        obj: YT_Credentials
-        if cls.get_num() > 0:
-            obj = cls.get_first() #TODO get correct one
+    def get(cls, yt_id):
+        return cls.query.filter_by(yt_id=yt_id).first()
 
-            obj.user_id = user_id
-            obj.account_name = account_name
-            obj.credentials = credentials
+    @classmethod
+    def delete(cls, yt_id: str):
+        obj = cls.get(yt_id=yt_id)
+        if obj:
+            db.session.delete(obj)
             db.session.commit()
-        else:
-            obj = cls.create(user_id, account_name, credentials)
+            return True
+        return False
 
+    ################################################################
+    # Properties
+    ################################################################
+
+    @property
+    def oauth_token(self) -> pyyoutube.AccessToken:
+        return pyyoutube.AccessToken.from_json(self._oauth_token)
+
+    @oauth_token.setter
+    def oauth_token(self, token: pyyoutube.AccessToken):
+        self._oauth_token = token.to_json()
